@@ -10,9 +10,11 @@ public class UserManager
 {
     private readonly ConcurrentDictionary<string, UserInformation> _userInfos = new();
 
-    public void RegisterUserWithConnectionId(string userId, string connectionId)
+    public OneOf<Success, BusinessFailure> RegisterUserWithConnectionId(string userId, string connectionId)
     {
-        _userInfos.TryAdd(userId, new UserInformation(userId, connectionId));
+        return _userInfos.TryAdd(userId, new UserInformation(userId, connectionId))
+            ? new Success()
+            : BusinessFailure.Of.NotAllowedUser();
     }
 
     public void RemoveUser(string userId)

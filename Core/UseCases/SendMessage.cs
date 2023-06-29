@@ -55,10 +55,10 @@ public record SendMessageCommand(string RoomId, string Message, string NameIdent
 
 public class SendMessageHandler : IHandler<SendMessageCommand, Success>
 {
-    private readonly IHubContext<ChatHub> _chatHub;
+    private readonly IHubContext<ChatHub, IChatHub> _chatHub;
     private readonly UserManager _userManager;
 
-    public SendMessageHandler(IHubContext<ChatHub> chatHub, UserManager userManager)
+    public SendMessageHandler(IHubContext<ChatHub, IChatHub> chatHub, UserManager userManager)
     {
         _chatHub = chatHub;
         _userManager = userManager;
@@ -70,13 +70,14 @@ public class SendMessageHandler : IHandler<SendMessageCommand, Success>
 
         var isInRoom = userInfo.Rooms.Contains(request.RoomId);
 
-        if (isInRoom)
+        if (!isInRoom)
         {
             return BusinessFailure.Of.NotFoundResource();
         }
 
-        await _chatHub.Clients.GroupExcept(request.RoomId, userInfo.ConnectionId)
-            .SendAsync("ReceiveMessage", request.Name, request.NameIdentifier, request.Message, cancellationToken);
+        await _chatHub.Clients
+            .GroupExcept(request.RoomId, userInfo.ConnectionId)
+            .ReceiveMessage(request.Name, request.NameIdentifier, request.Message);
 
         return new Success();
     }

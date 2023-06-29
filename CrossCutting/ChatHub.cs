@@ -1,13 +1,19 @@
 ﻿using CrossCutting.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
-using VSlices.Core.Abstracts.BusinessLogic;
 
 namespace CrossCutting;
 
-public class ChatHub : Hub
+public interface IChatHub
 {
+    Task ReceiveMessage(string fromUser, string fromUserId, string message);
+
+}
+
+public class ChatHub : Hub<IChatHub>
+{
+    public const string Url = "/chat";
+
     public override Task OnConnectedAsync()
     {
         var httpContext = Context.GetHttpContext();
@@ -16,7 +22,12 @@ public class ChatHub : Hub
         var userManager = httpContext
             .RequestServices.GetRequiredService<UserManager>();
 
-        userManager.RegisterUserWithConnectionId(Context.GetNameIdentifier(), Context.ConnectionId);
+        var userAdded = userManager.RegisterUserWithConnectionId(Context.GetNameIdentifier(), Context.ConnectionId);
+
+        if (userAdded.IsT1)
+        {
+            Context.Abort();
+        }
 
         return base.OnConnectedAsync();
     }
@@ -30,14 +41,14 @@ public class ChatHub : Hub
             .RequestServices.GetRequiredService<UserManager>();
 
         var nameIdentifier = Context.GetNameIdentifier();
-        var name= Context.GetName();
+        var name = Context.GetName();
 
         var rooms = userManager.GetRoomsOfUser(nameIdentifier);
 
         foreach (var roomId in rooms)
         {
             await Clients.Group(roomId)
-                .SendAsync("ReceiveMessage", "System", "NO APLICA", $"Se ha desconectado {name}#{nameIdentifier}");
+                .ReceiveMessage("System", Guid.Empty.ToString(), $"Se ha desconectado {name}#{nameIdentifier}");
         }
 
         userManager.RemoveUser(nameIdentifier);

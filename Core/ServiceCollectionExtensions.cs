@@ -16,12 +16,13 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddCrossCuttingConcerns(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSignalR();
+
         services.Configure<JwtConfiguration>(configuration.GetSection(nameof(JwtConfiguration)));
 
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddSingleton<UserManager>();
 
-        services.AddSignalR();
         services.AddAuthentication(opts =>
             {
                 opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

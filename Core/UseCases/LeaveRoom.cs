@@ -52,10 +52,10 @@ public record LeaveRoomCommand(string RoomId, string NameIdentifier, string Name
 // TODO: Agregar IHandler<T> where T : IRequest<Success>
 public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
 {
-    private readonly IHubContext<ChatHub> _chatHub;
+    private readonly IHubContext<ChatHub, IChatHub> _chatHub;
     private readonly UserManager _userManager;
 
-    public LeaveRoomHandler(IHubContext<ChatHub> chatHub, UserManager userManager)
+    public LeaveRoomHandler(IHubContext<ChatHub, IChatHub> chatHub, UserManager userManager)
     {
         _chatHub = chatHub;
         _userManager = userManager;
@@ -72,10 +72,12 @@ public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
             return result.AsT1;
         }
 
-        await _chatHub.Groups.RemoveFromGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
+        await _chatHub.Groups
+            .RemoveFromGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
 
-        await _chatHub.Clients.Group(request.RoomId)
-            .SendAsync("ReceiveMessage", "System", "NO APLICA", $"Se ha desconectado {request.Name}#{request.NameIdentifier}", cancellationToken);
+        await _chatHub.Clients
+            .Group(request.RoomId)
+            .ReceiveMessage("System", Guid.Empty.ToString(), $"Se ha desconectado {request.Name}#{request.NameIdentifier}");
 
         return new Success();
     }

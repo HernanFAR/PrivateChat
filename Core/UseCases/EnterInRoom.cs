@@ -51,10 +51,10 @@ public record EnterInRoomCommand(string RoomId, string NameIdentifier, string Na
 // TODO: Agregar IHandler<T> where T : IRequest<Success>
 public class EnterInRoomHandler : IHandler<EnterInRoomCommand, Success>
 {
-    private readonly IHubContext<ChatHub> _chatHub;
+    private readonly IHubContext<ChatHub, IChatHub> _chatHub;
     private readonly UserManager _userManager;
 
-    public EnterInRoomHandler(IHubContext<ChatHub> chatHub, UserManager userManager)
+    public EnterInRoomHandler(IHubContext<ChatHub, IChatHub> chatHub, UserManager userManager)
     {
         _chatHub = chatHub;
         _userManager = userManager;
@@ -66,7 +66,7 @@ public class EnterInRoomHandler : IHandler<EnterInRoomCommand, Success>
 
         await _chatHub.Groups.AddToGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
         await _chatHub.Clients.Group(request.RoomId)
-            .SendAsync("ReceiveMessage", "System", "NO APLICA", $"Se ha conectado: {request.Name}#{request.NameIdentifier}", cancellationToken);
+            .ReceiveMessage("System", Guid.Empty.ToString(), $"Se ha conectado: {request.Name}#{request.NameIdentifier}");
 
         userInfo.AddRoom(request.RoomId);
 

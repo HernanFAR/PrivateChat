@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="VSlices.Core.BusinessLogic.FluentValidation" Version="1.0.0" />
-    <PackageReference Include="VSlices.Core.Sender.Reflection" Version="1.0.0" />
+    <PackageReference Include="VSlices.Core.BusinessLogic.FluentValidation" Version="2.0.0" />
+    <PackageReference Include="VSlices.Core.Sender.Reflection" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
