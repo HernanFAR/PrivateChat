@@ -1,6 +1,4 @@
-﻿using Core.Extensions;
-using Core.UseCases.CreateUser;
-using CrossCutting;
+﻿using CrossCutting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -37,8 +35,8 @@ public class LeaveRoomEndpoint : IEndpointDefinition
         [FromServices] IHttpContextAccessor contextAccessor,
         [FromRoute] string room)
     {
-        var command = new LeaveRoomCommand(room, 
-            contextAccessor.HttpContext.GetNameIdentifier(), 
+        var command = new LeaveRoomCommand(room,
+            contextAccessor.HttpContext.GetNameIdentifier(),
             contextAccessor.HttpContext.GetName());
 
         var response = await sender.SendAsync(command);

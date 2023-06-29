@@ -1,5 +1,4 @@
-﻿using CrossCutting.Extensions;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CrossCutting;
@@ -22,7 +21,7 @@ public class ChatHub : Hub<IChatHub>
         var userManager = httpContext
             .RequestServices.GetRequiredService<UserManager>();
 
-        var userAdded = userManager.RegisterUserWithConnectionId(Context.GetNameIdentifier(), Context.ConnectionId);
+        var userAdded = userManager.RegisterUserWithContext(Context.GetNameIdentifier(), Context);
 
         if (userAdded.IsT1)
         {

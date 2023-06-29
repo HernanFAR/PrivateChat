@@ -2,17 +2,52 @@
 using OneOf;
 using OneOf.Types;
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.SignalR;
 using VSlices.Core.Abstracts.Responses;
+using Microsoft.AspNetCore.Connections.Features;
+using System;
 
 namespace CrossCutting;
 
 public class UserManager
 {
+    readonly HashSet<string> ConnectionsToDisconnect = new();
+    readonly object ConnectionsToDisconnectLock = new();
+
     private readonly ConcurrentDictionary<string, UserInformation> _userInfos = new();
 
-    public OneOf<Success, BusinessFailure> RegisterUserWithConnectionId(string userId, string connectionId)
+    public void DisconnectClient(string connectionId)
     {
-        return _userInfos.TryAdd(userId, new UserInformation(userId, connectionId))
+        lock (ConnectionsToDisconnectLock)
+        {
+            if (ConnectionsToDisconnect.Contains(connectionId)) return;
+
+            ConnectionsToDisconnect.Add(connectionId);
+        }
+    }
+
+    public OneOf<Success, BusinessFailure> RegisterUserWithContext(string userId, HubCallerContext context)
+    {
+        var heartbeatFeature = context.Features.Get<IConnectionHeartbeatFeature>();
+
+        if (heartbeatFeature is null)
+        {
+            throw new InvalidOperationException(nameof(heartbeatFeature));
+        }
+
+        heartbeatFeature.OnHeartbeat(state =>
+        {
+            lock (ConnectionsToDisconnectLock)
+            {
+                if (!ConnectionsToDisconnect.Contains(context.ConnectionId)) return;
+
+                context.Abort();
+                ConnectionsToDisconnect.Remove(context.ConnectionId);
+            }
+
+        }, context.ConnectionId);
+
+        return _userInfos.TryAdd(userId, new UserInformation(userId, context.ConnectionId))
             ? new Success()
             : BusinessFailure.Of.NotAllowedUser();
     }
@@ -20,30 +55,6 @@ public class UserManager
     public void RemoveUser(string userId)
     {
         _userInfos.TryRemove(userId, out _);
-    }
-
-    public OneOf<Success, BusinessFailure> RegisterUserInRoom(string userId, string roomId)
-    {
-        _userInfos.TryGetValue(userId, out var userInfo);
-
-        if (userInfo is null)
-        {
-            throw new InvalidOperationException(nameof(userInfo));
-        }
-
-        return userInfo.AddRoom(roomId);
-    }
-
-    public OneOf<Success, BusinessFailure> RemoveUserOfRoom(string userId, string roomId)
-    {
-        _userInfos.TryGetValue(userId, out var userInfo);
-
-        if (userInfo is null)
-        {
-            throw new InvalidOperationException(nameof(userInfo));
-        }
-
-        return userInfo.RemoveRoom(roomId);
     }
 
     public string[] GetRoomsOfUser(string userId)

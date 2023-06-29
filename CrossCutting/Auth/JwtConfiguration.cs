@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace CrossCutting;
+namespace CrossCutting.Auth;
 
 public class JwtConfiguration
 {

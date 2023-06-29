@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
-namespace Core.Extensions;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.AspNetCore.Http;
 
-internal static class HttpContextExtensions
+public static class HttpContextExtensions
 {
     public static string? TryGetClaim(this HttpContext? @this, string claimName)
     {

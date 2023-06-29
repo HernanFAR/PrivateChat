@@ -1,5 +1,6 @@
 ﻿using Core.UseCases.CreateUser;
 using CrossCutting;
+using CrossCutting.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -34,6 +35,7 @@ public static class ServiceCollectionExtensions
                 var provider = services.BuildServiceProvider();
                 var configMonitor = provider.GetRequiredService<IOptionsMonitor<JwtConfiguration>>();
 
+                opts.Events = new ApplicationJwtBearerEvents();
                 opts.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = configMonitor.CurrentValue.Issuer,

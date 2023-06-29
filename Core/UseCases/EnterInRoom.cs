@@ -1,5 +1,4 @@
-﻿using Core.Extensions;
-using CrossCutting;
+﻿using CrossCutting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

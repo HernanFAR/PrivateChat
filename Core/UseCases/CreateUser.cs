@@ -9,11 +9,11 @@ using OneOf;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CrossCutting;
 using VSlices.Core.Abstracts.BusinessLogic;
 using VSlices.Core.Abstracts.Presentation;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
+using CrossCutting.Auth;
 
 // ReSharper disable once CheckNamespace
 namespace Core.UseCases.CreateUser;

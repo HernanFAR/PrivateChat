@@ -1,8 +1,6 @@
-﻿using Core.Extensions;
-using CrossCutting;
+﻿using CrossCutting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
@@ -40,9 +38,9 @@ public class SendMessageEndpoint : IEndpointDefinition
         [FromRoute] string room,
         [FromBody] SendMessageContract contract)
     {
-        var command = new SendMessageCommand(room, 
-            contract.Message, 
-            contextAccessor.HttpContext.GetNameIdentifier(), 
+        var command = new SendMessageCommand(room,
+            contract.Message,
+            contextAccessor.HttpContext.GetNameIdentifier(),
             contextAccessor.HttpContext.GetName());
 
         var response = await sender.SendAsync(command);

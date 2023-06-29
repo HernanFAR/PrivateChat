@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
-namespace CrossCutting.Extensions;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.AspNetCore.SignalR;
 
 internal static class HubCallerContextExtensions
 {
