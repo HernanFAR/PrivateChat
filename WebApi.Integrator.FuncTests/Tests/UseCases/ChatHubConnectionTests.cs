@@ -43,7 +43,7 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
         {
             await hub.StartAsync();
 
-            await Task.Delay(10000);
+            await Task.Delay(85000);
 
             hub.Closed += async exception =>
             {
@@ -53,6 +53,8 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
             var response = await httpClient.PostAsync("/chat/new_room", new StringContent("", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json)));
 
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+
+            await Task.Delay(25000);
         }
 
         var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
