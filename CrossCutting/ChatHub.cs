@@ -5,7 +5,7 @@ namespace CrossCutting;
 
 public interface IChatHub
 {
-    Task ReceiveMessage(string fromUser, string fromUserId, string message);
+    Task ReceiveMessage(string fromUser, string fromUserId, string roomId, string message);
 
 }
 
@@ -47,7 +47,7 @@ public class ChatHub : Hub<IChatHub>
         foreach (var roomId in rooms)
         {
             await Clients.Group(roomId)
-                .ReceiveMessage("System", Guid.Empty.ToString(), $"Se ha desconectado {name}#{nameIdentifier}");
+                .ReceiveMessage("System", Guid.Empty.ToString(), roomId, $"Se ha desconectado {name}#{nameIdentifier}");
         }
 
         userManager.RemoveUser(nameIdentifier);

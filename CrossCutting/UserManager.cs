@@ -11,9 +11,10 @@ namespace CrossCutting;
 
 public class UserManager
 {
-    readonly HashSet<string> ConnectionsToDisconnect = new();
-    readonly object ConnectionsToDisconnectLock = new();
+    public string Id { get; } = Guid.NewGuid().ToString();
 
+    private readonly HashSet<string> ConnectionsToDisconnect = new();
+    private readonly object ConnectionsToDisconnectLock = new();
     private readonly ConcurrentDictionary<string, UserInformation> _userInfos = new();
 
     public void DisconnectClient(string connectionId)
@@ -69,15 +70,15 @@ public class UserManager
         return userInfo.Rooms.ToArray();
     }
 
-    public UserInformation GetUser(string userId)
+    public UserInformation? GetUserOrDefault(string userId)
     {
         _userInfos.TryGetValue(userId, out var userInfo);
 
-        if (userInfo is null)
-        {
-            throw new InvalidOperationException(nameof(userInfo));
-        }
-
         return userInfo;
+    }
+
+    public UserInformation GetUser(string userId)
+    {
+        return GetUserOrDefault(userId) ?? throw new InvalidOperationException(nameof(userId));
     }
 }

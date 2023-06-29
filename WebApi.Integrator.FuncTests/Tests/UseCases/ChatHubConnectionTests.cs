@@ -1,8 +1,8 @@
+using FluentAssertions;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using CrossCutting;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace WebApi.Integrator.FuncTests.Tests.UseCases;
@@ -19,18 +19,22 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
     [Fact]
     public async Task ConnectToHub_ShouldConnectCorrectly()
     {
-        var jwt = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         await using var hub = _fixture.PrivateChatWebApi.CreateChatHubConnection(jwt);
 
         await hub.StartAsync();
+
+        var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
+
+        userManager.GetUserOrDefault(userId).Should().NotBeNull();
     }
 
     [Fact]
     public async Task ConnectToHub_ShouldDisconnect_Detail_InvalidToken()
     {
-        var jwt = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán", TimeSpan.FromSeconds(3));
-        
+        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán", TimeSpan.FromSeconds(3));
+
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
 
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -51,5 +55,8 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
 
+        var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
+
+        userManager.GetUserOrDefault(userId).Should().BeNull();
     }
 }

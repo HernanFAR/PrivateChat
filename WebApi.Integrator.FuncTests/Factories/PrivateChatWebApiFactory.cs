@@ -8,12 +8,15 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
+using CrossCutting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using CrossCutting.Auth;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace WebApi.Integrator.FuncTests.Factories;
 
@@ -23,6 +26,8 @@ public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
     private IHost? _host;
 
     private readonly Uri _baseUrl = new("http://localhost:5000");
+
+    public UserManager UserManagerInstance { get; } = new UserManager();
 
     public PrivateChatWebApiFactory()
     {
@@ -97,6 +102,12 @@ public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureLogging(loggingBuilder => loggingBuilder.ClearProviders());
 
+        builder.ConfigureTestServices(e =>
+        {
+            e.RemoveAll<UserManager>();
+            e.AddSingleton(UserManagerInstance);
+        });
+
         // Configure the server address for the server to
         // listen on for HTTPS requests on a dynamic port.
         builder.UseUrls(_baseUrl.ToString());
@@ -125,15 +136,16 @@ public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
         _disposed = true;
     }
 
-    public string GenerateJwtTokenForName(string name, TimeSpan? customDuration = null)
+    public (string Token, string UserId) GenerateJwtTokenForName(string name, TimeSpan? customDuration = null)
     {
+        var userId = Guid.NewGuid().ToString().Replace("-", "");
         var jwtConfigMonitor = Services.GetRequiredService<IOptions<JwtConfiguration>>();
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfigMonitor.Value.IssuerSigningKey));
         var claims = new Claim[]
         {
             new(ClaimTypes.Name, name),
-            new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString().Replace("-", "")),
+            new(ClaimTypes.NameIdentifier, userId),
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -146,7 +158,7 @@ public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
         );
 
-        return tokenHandler.WriteToken(jwt);
+        return (tokenHandler.WriteToken(jwt), userId);
     }
 
     public HubConnection CreateChatHubConnection(string jwt)

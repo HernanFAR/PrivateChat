@@ -1,6 +1,6 @@
 using Core.UseCases.ChatHubConnection;
 using Core.UseCases.CreateUser;
-using Core.UseCases.EnterInRoom;
+using Core.UseCases.EnterRoom;
 using Core.UseCases.LeaveRoom;
 using Core.UseCases.SendMessage;
 
@@ -13,7 +13,7 @@ builder.Services.AddCrossCuttingConcerns(builder.Configuration);
 
 builder.Services.AddEndpointDefinition<ChatHubConnectionEndpoint>();
 builder.Services.AddEndpointDefinition<CreateUserEndpoint>();
-builder.Services.AddEndpointDefinition<EnterInRoomEndpoint>();
+builder.Services.AddEndpointDefinition<EnterRoomEndpoint>();
 builder.Services.AddEndpointDefinition<LeaveRoomEndpoint>();
 builder.Services.AddEndpointDefinition<SendMessageEndpoint>();
 

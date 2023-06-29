@@ -22,12 +22,12 @@ public class CreateUserTests : IClassFixture<TestFixture>
     }
 
     [Fact]
-    public async Task ConnectToHub_ShouldConnectCorrectly()
+    public async Task CreateUser_ShouldCreateJwtTokenCorrectly()
     {
-        var httpContext = _fixture.PrivateChatWebApi.CreateClient();
+        var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         var contract = new CreateUserContract("Hernán");
 
-        var httpResponse = await httpContext.PostAsJsonAsync("/user", contract);
+        var httpResponse = await httpClient.PostAsJsonAsync("/user", contract);
 
         httpResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -42,5 +42,24 @@ public class CreateUserTests : IClassFixture<TestFixture>
         jsonToken.Claims
             .Should().Contain(
                 e => e.Type == ClaimTypes.Name && e.Value == contract.Name);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task CreateUser_ShouldReturnValidationErrors(string value)
+    {
+        var httpContext = _fixture.PrivateChatWebApi.CreateClient();
+        var contract = new CreateUserContract(value);
+
+        var httpResponse = await httpContext.PostAsJsonAsync("/user", contract);
+
+        httpResponse.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+
+        var createUserResponse = await httpResponse.Content.ReadFromJsonAsync<string[]>();
+
+        createUserResponse.Should().Contain(CreateUserValidator.NameNotEmptyMessage);
+
+
     }
 }

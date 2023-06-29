@@ -6,6 +6,8 @@ namespace Domain;
 
 public class UserInformation
 {
+    public const string CantAddMoreRooms = "No puedes entrar a más de 5 habitaciones a la vez";
+
     public string Id { get; }
     public string ConnectionId { get; }
     public IReadOnlyList<string> Rooms => _rooms;
@@ -21,9 +23,14 @@ public class UserInformation
 
     public OneOf<Success, BusinessFailure> AddRoom(string roomId)
     {
-        if (_rooms.Count > 5)
+        if (_rooms.Count > 4)
         {
-            return BusinessFailure.Of.DomainValidation("No puedes entrar a más de 5 habitaciones a la vez");
+            return BusinessFailure.Of.DomainValidation(CantAddMoreRooms);
+        }
+
+        if (_rooms.Contains(roomId))
+        {
+            return new Success();
         }
 
         _rooms.Add(roomId);

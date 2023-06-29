@@ -1,7 +1,7 @@
-﻿using Core.UseCases.EnterRoom;
-using CrossCutting;
+﻿using CrossCutting;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -15,31 +15,31 @@ using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
 
 // ReSharper disable once CheckNamespace
-namespace Core.UseCases.LeaveRoom;
+namespace Core.UseCases.EnterRoom;
 
-public class LeaveRoomEndpoint : IEndpointDefinition
+public class EnterRoomEndpoint : IEndpointDefinition
 {
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapDelete("/chat/{room}", LeaveRoom)
-            .WithName(nameof(LeaveRoom))
+        builder.MapPost("/chat/{room}", EnterRoom)
+            .WithName(nameof(EnterRoom))
             .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound)
+            .Produces<string[]>(StatusCodes.Status422UnprocessableEntity)
             .RequireAuthorization();
     }
 
     public static void DefineDependencies(IServiceCollection services)
     {
-        services.AddScoped<IHandler<LeaveRoomCommand, Success>, LeaveRoomHandler>();
-        services.AddScoped<IValidator<LeaveRoomCommand>, LeaveRoomValidator>();
+        services.AddScoped<IHandler<EnterRoomCommand, Success>, EnterRoomHandler>();
+        services.AddScoped<IValidator<EnterRoomCommand>, EnterRoomValidator>();
     }
 
-    public static async Task<IResult> LeaveRoom(
+    public static async Task<IResult> EnterRoom(
         [FromServices] ISender sender,
         [FromServices] IHttpContextAccessor contextAccessor,
         [FromRoute] string room)
     {
-        var command = new LeaveRoomCommand(room,
+        var command = new EnterRoomCommand(room,
             contextAccessor.HttpContext.GetNameIdentifier(),
             contextAccessor.HttpContext.GetName());
 
@@ -49,15 +49,15 @@ public class LeaveRoomEndpoint : IEndpointDefinition
     }
 }
 
-public record LeaveRoomCommand(string RoomId, string NameIdentifier, string Name) : ICommand;
+public record EnterRoomCommand(string RoomId, string NameIdentifier, string Name) : ICommand;
 
-public class LeaveRoomValidator : AbstractValidator<LeaveRoomCommand>
+public class EnterRoomValidator : AbstractValidator<EnterRoomCommand>
 {
     public const string UserNotRegisteredInUserManager = "Debes conectar con el web socket del chat para enviar mensajes";
 
     private readonly UserManager _userManager;
 
-    public LeaveRoomValidator(UserManager userManager)
+    public EnterRoomValidator(UserManager userManager)
     {
         _userManager = userManager;
 
@@ -72,41 +72,40 @@ public class LeaveRoomValidator : AbstractValidator<LeaveRoomCommand>
 }
 
 // TODO: Agregar IHandler<T> where T : IRequest<Success>
-public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
+public class EnterRoomHandler : IHandler<EnterRoomCommand, Success>
 {
     private readonly IHubContext<ChatHub, IChatHub> _chatHub;
     private readonly UserManager _userManager;
 
     public const string SystemName = "System";
-    public const string SystemWelcomeMessage = "Se ha desconectado: {0}#{1}.";
+    public const string SystemWelcomeMessage = "Se ha conectado: {0}#{1} ¡Bienvenido!";
 
-    public LeaveRoomHandler(IHubContext<ChatHub, IChatHub> chatHub, UserManager userManager)
+    public EnterRoomHandler(IHubContext<ChatHub, IChatHub> chatHub, UserManager userManager)
     {
         _chatHub = chatHub;
         _userManager = userManager;
     }
 
-    public async ValueTask<OneOf<Success, BusinessFailure>> HandleAsync(LeaveRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public async ValueTask<OneOf<Success, BusinessFailure>> HandleAsync(EnterRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         var userInfo = _userManager.GetUser(request.NameIdentifier);
 
-        var result = userInfo.RemoveRoom(request.RoomId);
+        var result = userInfo.AddRoom(request.RoomId);
 
         if (result.IsT1)
         {
             return result.AsT1;
         }
 
-        await _chatHub.Groups
-            .RemoveFromGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
-
         await _chatHub.Clients
             .Group(request.RoomId)
             .ReceiveMessage(
                 SystemName, 
                 Guid.Empty.ToString(), 
-                request.RoomId, 
+                request.RoomId,
                 string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier));
+
+        await _chatHub.Groups.AddToGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
 
         return new Success();
     }

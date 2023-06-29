@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OneOf;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Security;
 using System.Security.Claims;
 using System.Text;
 using VSlices.Core.Abstracts.BusinessLogic;
@@ -14,6 +15,7 @@ using VSlices.Core.Abstracts.Presentation;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
 using CrossCutting.Auth;
+using FluentValidation;
 
 // ReSharper disable once CheckNamespace
 namespace Core.UseCases.CreateUser;
@@ -24,17 +26,19 @@ public class CreateUserEndpoint : IEndpointDefinition
 {
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/user", Handle)
-            .WithName(nameof(CreateUserEndpoint))
-            .Produces<CreateUserCommandResponse>();
+        builder.MapPost("/user", CreateUser)
+            .WithName(nameof(CreateUser))
+            .Produces<CreateUserCommandResponse>()
+            .Produces<string[]>(StatusCodes.Status422UnprocessableEntity);
     }
 
     public static void DefineDependencies(IServiceCollection services)
     {
         services.AddScoped<IHandler<CreateUserCommand, CreateUserCommandResponse>, CreateUserHandler>();
+        services.AddScoped<IValidator<CreateUserCommand>, CreateUserValidator>();
     }
 
-    public static async Task<IResult> Handle(
+    public static async Task<IResult> CreateUser(
         [FromServices] ISender sender,
         [FromServices] IHttpContextAccessor contextAccessor,
         [FromBody] CreateUserContract contract)
@@ -50,6 +54,17 @@ public class CreateUserEndpoint : IEndpointDefinition
 public record CreateUserCommandResponse(string Token);
 
 public record CreateUserCommand(string Name) : ICommand<CreateUserCommandResponse>;
+
+public class CreateUserValidator : AbstractValidator<CreateUserCommand>
+{
+    public const string NameNotEmptyMessage = "Debes incluir un nombre valido";
+
+    public CreateUserValidator()
+    {
+        RuleFor(e => e.Name)
+            .NotEmpty().WithMessage(NameNotEmptyMessage);
+    }
+}
 
 public class CreateUserHandler : IHandler<CreateUserCommand, CreateUserCommandResponse>
 {

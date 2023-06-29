@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Integrator", "WebApi.Integrator\WebApi.Integrator.csproj", "{281C7AB6-7D43-49E9-968D-A16D9A3121A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi.Integrator", "WebApi.Integrator\WebApi.Integrator.csproj", "{281C7AB6-7D43-49E9-968D-A16D9A3121A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{794A69AE-4EDC-48EE-82B1-9398CBE2D2D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{794A69AE-4EDC-48EE-82B1-9398CBE2D2D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossCutting", "CrossCutting\CrossCutting.csproj", "{59CD0B45-722C-44E0-80E1-2942577121DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrossCutting", "CrossCutting\CrossCutting.csproj", "{59CD0B45-722C-44E0-80E1-2942577121DE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{E8E40EEF-3243-4078-920A-C502FEF56797}"
 EndProject
@@ -15,9 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6810152B-B14
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A885213D-EE05-4BB1-ADCF-2FAAF06CD6D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Integrator.FuncTests", "WebApi.Integrator.FuncTests\WebApi.Integrator.FuncTests.csproj", "{8BD883FC-293A-4F59-93E5-C17E4D4A202F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi.Integrator.FuncTests", "WebApi.Integrator.FuncTests\WebApi.Integrator.FuncTests.csproj", "{8BD883FC-293A-4F59-93E5-C17E4D4A202F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{8AE49323-CD9A-4249-9A52-ECF64737299D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{F2772E5E-7A4F-46DB-B036-0AC6D08F01D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,7 @@ Global
 		{E8E40EEF-3243-4078-920A-C502FEF56797} = {8AE49323-CD9A-4249-9A52-ECF64737299D}
 		{8BD883FC-293A-4F59-93E5-C17E4D4A202F} = {A885213D-EE05-4BB1-ADCF-2FAAF06CD6D2}
 		{8AE49323-CD9A-4249-9A52-ECF64737299D} = {6810152B-B14A-4725-A0B5-06FF69DD430D}
+		{F2772E5E-7A4F-46DB-B036-0AC6D08F01D1} = {A885213D-EE05-4BB1-ADCF-2FAAF06CD6D2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E29D88E9-87B2-40AB-B4B1-19B5E2FEB01A}

@@ -1,6 +1,9 @@
-﻿using CrossCutting;
+﻿using System.Net.Security;
+using CrossCutting;
+using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
@@ -24,12 +27,15 @@ public class SendMessageEndpoint : IEndpointDefinition
         builder.MapPost("/chat/{room}/message", Handle)
             .WithName(nameof(SendMessageEndpoint))
             .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces<string[]>(StatusCodes.Status422UnprocessableEntity)
             .RequireAuthorization();
     }
 
     public static void DefineDependencies(IServiceCollection services)
     {
         services.AddScoped<IHandler<SendMessageCommand, Success>, SendMessageHandler>();
+        services.AddTransient<IValidator<SendMessageCommand>, SendMessageValidator>();
     }
 
     public static async Task<IResult> Handle(
@@ -50,6 +56,34 @@ public class SendMessageEndpoint : IEndpointDefinition
 }
 
 public record SendMessageCommand(string RoomId, string Message, string NameIdentifier, string Name) : ICommand;
+
+public class SendMessageValidator : AbstractValidator<SendMessageCommand>
+{
+    public const string NameNotEmptyMessage = "Debes indicar una habitación para el mensaje";
+    public const string MessageNotEmptyMessage = "Debes indicar un mensaje";
+    public const string UserNotRegisteredInUserManager = "Debes conectar con el web socket del chat para enviar mensajes";
+
+    private readonly UserManager _userManager;
+
+    public SendMessageValidator(UserManager userManager)
+    {
+        _userManager = userManager;
+
+        RuleFor(e => e.Name)
+            .NotEmpty().WithMessage(NameNotEmptyMessage);
+
+        RuleFor(e => e.Message)
+            .NotEmpty().WithMessage(MessageNotEmptyMessage);
+
+        RuleFor(e => e.NameIdentifier)
+            .Must(BeRegisterInUserManager).WithMessage(UserNotRegisteredInUserManager);
+    }
+
+    private bool BeRegisterInUserManager(string userId)
+    {
+        return _userManager.GetUserOrDefault(userId) is not null;
+    }
+}
 
 public class SendMessageHandler : IHandler<SendMessageCommand, Success>
 {
@@ -75,7 +109,7 @@ public class SendMessageHandler : IHandler<SendMessageCommand, Success>
 
         await _chatHub.Clients
             .GroupExcept(request.RoomId, userInfo.ConnectionId)
-            .ReceiveMessage(request.Name, request.NameIdentifier, request.Message);
+            .ReceiveMessage(request.Name, request.NameIdentifier, request.RoomId, request.Message);
 
         return new Success();
     }
