@@ -1,8 +1,11 @@
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.RateLimiting;
 using Core.UseCases.ChatHubConnection;
 using Core.UseCases.CreateUser;
 using Core.UseCases.EnterRoom;
 using Core.UseCases.LeaveRoom;
 using Core.UseCases.SendMessage;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,13 +22,37 @@ builder.Services.AddEndpointDefinition<SendMessageEndpoint>();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHttpsRedirection();
+app.UseRateLimiter(new RateLimiterOptions
+{
+    GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        if (context.Request.Path == "/chat")
+        {
+            return RateLimitPartition.GetNoLimiter("NoLimits");
+        }
+
+        return RateLimitPartition.GetTokenBucketLimiter("TokenBased",
+            _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = 20,
+                AutoReplenishment = true,
+                QueueProcessingOrder = QueueProcessingOrder.NewestFirst,
+                QueueLimit = 0,
+                ReplenishmentPeriod = TimeSpan.FromSeconds(10),
+                TokensPerPeriod = 20
+            });
+    }),
+    RejectionStatusCode = StatusCodes.Status429TooManyRequests
+});
+
 app.UseEndpointDefinitions();
 
 app.Run();
