@@ -125,7 +125,7 @@ public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
         _disposed = true;
     }
 
-    public string GenerateJwtTokenForName(string name)
+    public string GenerateJwtTokenForName(string name, TimeSpan? customDuration = null)
     {
         var jwtConfigMonitor = Services.GetRequiredService<IOptions<JwtConfiguration>>();
 
@@ -142,7 +142,7 @@ public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
             issuer: jwtConfigMonitor.Value.Issuer,
             audience: jwtConfigMonitor.Value.Audience,
             claims: claims,
-            expires: DateTime.Now.Add(jwtConfigMonitor.Value.Duration),
+            expires: DateTime.Now.Add(customDuration ?? jwtConfigMonitor.Value.Duration),
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
         );
 
