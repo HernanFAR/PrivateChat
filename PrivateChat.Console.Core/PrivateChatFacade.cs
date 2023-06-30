@@ -178,7 +178,7 @@ public class PrivateChatFacade : IAsyncDisposable
     {
         try
         {
-            await _connection.SendMessageEndpointAsync(roomId,
+            await _connection.SendMessageAsync(roomId,
                 new SendMessageContract
                 {
                     Message = message

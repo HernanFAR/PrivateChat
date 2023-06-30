@@ -5,13 +5,13 @@
     "description": "Una WebApi open-source para mensajer�a instant�nea, sin guardado de informaci�n en servidor",
     "contact": {
       "name": "Hern�n �lvarez",
-      "url": "https://www.linkedin.com/in/hernan-a-rubio/",
+      "url": "https://github.com/HernanFAR/PrivateChat",
       "email": "h.f.alvarez.rubio@gmail.com"
     },
     "license": {
       "name": "MIT"
     },
-    "version": "v1.1"
+    "version": "v1.1.1"
   },
   "paths": {
     "/api/user": {
@@ -139,7 +139,7 @@
         "tags": [
           "SendMessageEndpoint"
         ],
-        "operationId": "SendMessageEndpoint",
+        "operationId": "SendMessage",
         "parameters": [
           {
             "name": "room",
