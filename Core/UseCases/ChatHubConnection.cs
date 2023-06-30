@@ -11,7 +11,7 @@ public class ChatHubConnectionEndpoint : IEndpointDefinition
 {
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapHub<ChatHub>("/chat")
+        builder.MapHub<ChatHub>(ChatHub.Url)
             .RequireAuthorization();
     }
 

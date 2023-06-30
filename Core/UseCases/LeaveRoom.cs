@@ -1,5 +1,4 @@
-﻿using Core.UseCases.EnterRoom;
-using CrossCutting;
+﻿using CrossCutting;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +23,9 @@ public class LeaveRoomEndpoint : IEndpointDefinition
         builder.MapDelete("/chat/{room}", LeaveRoom)
             .WithName(nameof(LeaveRoom))
             .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status429TooManyRequests)
             .RequireAuthorization();
     }
 
@@ -103,9 +104,9 @@ public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
         await _chatHub.Clients
             .Group(request.RoomId)
             .ReceiveMessage(
-                SystemName, 
-                Guid.Empty.ToString(), 
-                request.RoomId, 
+                SystemName,
+                Guid.Empty.ToString(),
+                request.RoomId,
                 string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier));
 
         return new Success();

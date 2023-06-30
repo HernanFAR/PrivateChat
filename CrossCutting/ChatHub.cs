@@ -1,17 +1,23 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using SignalRSwaggerGen.Attributes;
+using SignalRSwaggerGen.Enums;
 
 namespace CrossCutting;
 
+[SignalRHub(path: ChatHub.Url)]
 public interface IChatHub
 {
+    [SignalRMethod("[Method]", Operation.Get, 
+        summary: "Websocket para recibir los mensajes", 
+        description: $"Debes escuchar {nameof(ReceiveMessage)}, en \"{ChatHub.Url}\" con los siguientes parámetros, accionado cada vez que recibes un mensaje en una habitación" )]
     Task ReceiveMessage(string fromUser, string fromUserId, string roomId, string message);
-
+    
 }
 
 public class ChatHub : Hub<IChatHub>
 {
-    public const string Url = "/chat";
+    public const string Url = "/websocket/chat";
 
     public override Task OnConnectedAsync()
     {

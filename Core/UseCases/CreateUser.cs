@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using CrossCutting.Auth;
+using FluentValidation;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -7,15 +9,12 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OneOf;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Security;
 using System.Security.Claims;
 using System.Text;
 using VSlices.Core.Abstracts.BusinessLogic;
 using VSlices.Core.Abstracts.Presentation;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
-using CrossCutting.Auth;
-using FluentValidation;
 
 // ReSharper disable once CheckNamespace
 namespace Core.UseCases.CreateUser;
@@ -24,12 +23,15 @@ public record CreateUserContract(string Name);
 
 public class CreateUserEndpoint : IEndpointDefinition
 {
+    public const string Url = "api/user";
+
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/user", CreateUser)
+        builder.MapPost(Url, CreateUser)
             .WithName(nameof(CreateUser))
             .Produces<CreateUserCommandResponse>()
-            .Produces<string[]>(StatusCodes.Status422UnprocessableEntity);
+            .Produces<string[]>(StatusCodes.Status422UnprocessableEntity)
+            .Produces(StatusCodes.Status429TooManyRequests);
     }
 
     public static void DefineDependencies(IServiceCollection services)
