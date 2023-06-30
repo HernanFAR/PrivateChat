@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using PrivateChat.MaUI.Data;
+using Radzen;
 
 namespace PrivateChat.MaUI;
+
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
@@ -17,11 +18,14 @@ public static class MauiProgram
         builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
-		builder.Services.AddBlazorWebViewDeveloperTools();
-		builder.Logging.AddDebug();
+        builder.Services.AddBlazorWebViewDeveloperTools();
+        builder.Logging.AddDebug();
 #endif
 
-        builder.Services.AddSingleton<WeatherForecastService>();
+        builder.Services.AddScoped<ContextMenuService>();
+        builder.Services.AddScoped<DialogService>();
+        builder.Services.AddScoped<TooltipService>();
+        builder.Services.AddScoped<NotificationService>();
 
         return builder.Build();
     }
