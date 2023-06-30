@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
+using CrossCutting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +38,7 @@ builder.Services.AddSwaggerGen(setup =>
         {
             Name = "Hernán Álvarez",
             Email = "h.f.alvarez.rubio@gmail.com",
-            Url = new Uri("https://www.linkedin.com/in/hernan-a-rubio/")
+            Url = new Uri("https://github.com/HernanFAR/PrivateChat")
         },
         License = new OpenApiLicense
         {
@@ -90,7 +91,7 @@ app.UseRateLimiter(new RateLimiterOptions
 {
     GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
     {
-        if (context.Request.Path == "/chat")
+        if (context.Request.Path == ChatHub.Url)
         {
             return RateLimitPartition.GetNoLimiter("NoLimits");
         }
