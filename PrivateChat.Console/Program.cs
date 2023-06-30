@@ -10,7 +10,9 @@ while (true)
     var facadeCreationResult = await PrivateChatFacade.CreateForNameAsync(username,
         (fromUser, fromUserId, _, message) =>
         {
+            ClearCurrentConsoleLine();
             Console.WriteLine($"{fromUser}#{fromUserId}: {message}");
+            Console.Write($"{username}: ");
         }, true);
 
     if (facadeCreationResult.IsT0)
@@ -80,4 +82,13 @@ await using (facade)
             }
         }
     }
+}
+
+static void ClearCurrentConsoleLine()
+{
+    var currentLineCursor = Console.CursorTop;
+    Console.SetCursorPosition(0, Console.CursorTop);
+    for (var i = 0; i < Console.WindowWidth; i++)
+        Console.Write(" ");
+    Console.SetCursorPosition(0, currentLineCursor);
 }
