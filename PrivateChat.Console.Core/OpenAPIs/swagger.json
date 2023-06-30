@@ -1,0 +1,290 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "PrivateChatWebApi",
+    "description": "Una WebApi open-source para mensajer�a instant�nea, sin guardado de informaci�n en servidor",
+    "contact": {
+      "name": "Hern�n �lvarez",
+      "url": "https://www.linkedin.com/in/hernan-a-rubio/",
+      "email": "h.f.alvarez.rubio@gmail.com"
+    },
+    "license": {
+      "name": "MIT"
+    },
+    "version": "v1.1"
+  },
+  "paths": {
+    "/api/user": {
+      "post": {
+        "tags": [
+          "CreateUserEndpoint"
+        ],
+        "operationId": "CreateUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserContract"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserCommandResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/api/chat/{room}": {
+      "post": {
+        "tags": [
+          "EnterRoomEndpoint"
+        ],
+        "operationId": "EnterRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "422": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "LeaveRoomEndpoint"
+        ],
+        "operationId": "LeaveRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/api/chat/{room}/message": {
+      "post": {
+        "tags": [
+          "SendMessageEndpoint"
+        ],
+        "operationId": "SendMessageEndpoint",
+        "parameters": [
+          {
+            "name": "room",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageContract"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/websocket/chat/ReceiveMessage": {
+      "get": {
+        "tags": [
+          "ChatHub"
+        ],
+        "summary": "Websocket para recibir los mensajes",
+        "description": "Debes escuchar ReceiveMessage, en \"/websocket/chat\" con los siguientes parámetros, accionado cada vez que recibes un mensaje en una habitación",
+        "parameters": [
+          {
+            "name": "fromUser",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromUserId",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roomId",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "message",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": { }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateUserCommandResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateUserContract": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SendMessageContract": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Pon solamente tu Token JWT Bearer en el input inferior",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "ChatHub"
+    }
+  ]
+}
