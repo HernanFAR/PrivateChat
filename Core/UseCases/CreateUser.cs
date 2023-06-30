@@ -23,7 +23,7 @@ public record CreateUserContract(string Name);
 
 public class CreateUserEndpoint : IEndpointDefinition
 {
-    public const string Url = "api/user";
+    public const string Url = "/api/user";
 
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {

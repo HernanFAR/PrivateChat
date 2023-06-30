@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Core.UseCases.LeaveRoom;
 using CrossCutting;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using Core.UseCases.LeaveRoom;
-using Domain;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace WebApi.Integrator.FuncTests.Tests.UseCases;
 
@@ -29,6 +22,8 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
     public async Task LeaveRoom_ShouldHaveRegisterRoomAtUserManager()
     {
         const string roomName = "2";
+        var roomUrl = LeaveRoomEndpoint.Url
+            .Replace("{room}", roomName);
 
         var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
@@ -39,10 +34,10 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
 
         await hub.StartAsync();
 
-        var response1 = await httpClient.PostAsJsonAsync($"/chat/{roomName}", new object());
+        var response1 = await httpClient.PostAsJsonAsync(roomUrl, new object());
         response1.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var response2 = await httpClient.DeleteAsync($"/chat/{roomName}");
+        var response2 = await httpClient.DeleteAsync(roomUrl);
         response2.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
@@ -54,13 +49,15 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
     public async Task LeaveRoom_ShouldShowUnprocessableEntity_DetailUserNotConnectedToHub()
     {
         const string roomName = "2";
+        var roomUrl = LeaveRoomEndpoint.Url
+            .Replace("{room}", roomName);
 
         var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
 
-        var response = await httpClient.DeleteAsync($"/chat/{roomName}");
+        var response = await httpClient.DeleteAsync(roomUrl);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 
@@ -73,6 +70,8 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
     public async Task LeaveRoom_ShouldReturnNotFound()
     {
         const string roomName = "1";
+        var roomUrl = LeaveRoomEndpoint.Url
+            .Replace("{room}", roomName);
 
         var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
@@ -83,7 +82,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
 
         await hub.StartAsync();
 
-        var response = await httpClient.DeleteAsync($"/chat/{roomName}");
+        var response = await httpClient.DeleteAsync(roomUrl);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
     }
@@ -94,6 +93,11 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var messageSend = false;
         const string roomName1 = "1";
         const string roomName2 = "2";
+        var room1Url = LeaveRoomEndpoint.Url
+            .Replace("{room}", roomName1);
+        var room2Url = LeaveRoomEndpoint.Url
+            .Replace("{room}", roomName1);
+
         const string userName = "Fabian";
 
         var (jwtHernan, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
@@ -106,18 +110,18 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         httpClientFabian.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwtFabian}");
 
         await using var hubHernan = _fixture.PrivateChatWebApi.CreateChatHubConnection(jwtHernan);
-        await using var hubFabian= _fixture.PrivateChatWebApi.CreateChatHubConnection(jwtFabian);
+        await using var hubFabian = _fixture.PrivateChatWebApi.CreateChatHubConnection(jwtFabian);
 
         await hubFabian.StartAsync();
         await hubHernan.StartAsync();
 
-        var response1 = await httpClientHernan.PostAsJsonAsync($"/chat/{roomName1}", new object());
+        var response1 = await httpClientHernan.PostAsJsonAsync(room1Url, new object());
         response1.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var response2 = await httpClientHernan.PostAsJsonAsync($"/chat/{roomName2}", new object());
+        var response2 = await httpClientHernan.PostAsJsonAsync(room2Url, new object());
         response2.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var response3 = await httpClientFabian.PostAsJsonAsync($"/chat/{roomName1}", new object());
+        var response3 = await httpClientFabian.PostAsJsonAsync(room1Url, new object());
         response3.StatusCode.Should().Be(HttpStatusCode.OK);
 
         hubHernan.On<string, string, string, string>("ReceiveMessage", (fromUser, fromUserId, roomId, message) =>
@@ -130,7 +134,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
             messageSend = true;
         });
 
-        var response4 = await httpClientFabian.DeleteAsync($"/chat/{roomName1}");
+        var response4 = await httpClientFabian.DeleteAsync(room1Url);
         response4.StatusCode.Should().Be(HttpStatusCode.OK);
 
         await Task.Delay(3000);

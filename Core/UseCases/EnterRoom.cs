@@ -18,9 +18,11 @@ namespace Core.UseCases.EnterRoom;
 
 public class EnterRoomEndpoint : IEndpointDefinition
 {
+    public const string Url = "/api/chat/{room}";
+
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/chat/{room}", EnterRoom)
+        builder.MapPost(Url, EnterRoom)
             .WithName(nameof(EnterRoom))
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)

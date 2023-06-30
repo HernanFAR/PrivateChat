@@ -18,9 +18,11 @@ namespace Core.UseCases.LeaveRoom;
 
 public class LeaveRoomEndpoint : IEndpointDefinition
 {
+    public const string Url = "/api/chat/{room}";
+
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapDelete("/chat/{room}", LeaveRoom)
+        builder.MapDelete(Url, LeaveRoom)
             .WithName(nameof(LeaveRoom))
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
