@@ -1,7 +1,6 @@
 ﻿using CrossCutting;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -19,12 +18,16 @@ namespace Core.UseCases.EnterRoom;
 
 public class EnterRoomEndpoint : IEndpointDefinition
 {
+    public const string Url = "/api/chat/{room}";
+
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/chat/{room}", EnterRoom)
+        builder.MapPost(Url, EnterRoom)
             .WithName(nameof(EnterRoom))
             .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces<string[]>(StatusCodes.Status422UnprocessableEntity)
+            .Produces(StatusCodes.Status429TooManyRequests)
             .RequireAuthorization();
     }
 
@@ -100,8 +103,8 @@ public class EnterRoomHandler : IHandler<EnterRoomCommand, Success>
         await _chatHub.Clients
             .Group(request.RoomId)
             .ReceiveMessage(
-                SystemName, 
-                Guid.Empty.ToString(), 
+                SystemName,
+                Guid.Empty.ToString(),
                 request.RoomId,
                 string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier));
 

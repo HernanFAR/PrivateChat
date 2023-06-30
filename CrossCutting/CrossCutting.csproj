@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="VSlices.CrossCutting.Validation.FluentValidation" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.8" />
+    <PackageReference Include="SignalRSwaggerGen" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>

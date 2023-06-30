@@ -22,13 +22,17 @@ public record SendMessageContract(string Message);
 
 public class SendMessageEndpoint : IEndpointDefinition
 {
+    public const string Url = "/api/chat/{room}/message";
+
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/chat/{room}/message", Handle)
+        builder.MapPost(Url, Handle)
             .WithName(nameof(SendMessageEndpoint))
             .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
             .Produces<string[]>(StatusCodes.Status422UnprocessableEntity)
+            .Produces(StatusCodes.Status429TooManyRequests)
             .RequireAuthorization();
     }
 

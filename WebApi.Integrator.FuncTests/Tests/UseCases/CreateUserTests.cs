@@ -27,7 +27,7 @@ public class CreateUserTests : IClassFixture<TestFixture>
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         var contract = new CreateUserContract("Hernán");
 
-        var httpResponse = await httpClient.PostAsJsonAsync("/user", contract);
+        var httpResponse = await httpClient.PostAsJsonAsync(CreateUserEndpoint.Url, contract);
 
         httpResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -52,7 +52,7 @@ public class CreateUserTests : IClassFixture<TestFixture>
         var httpContext = _fixture.PrivateChatWebApi.CreateClient();
         var contract = new CreateUserContract(value);
 
-        var httpResponse = await httpContext.PostAsJsonAsync("/user", contract);
+        var httpResponse = await httpContext.PostAsJsonAsync(CreateUserEndpoint.Url, contract);
 
         httpResponse.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 

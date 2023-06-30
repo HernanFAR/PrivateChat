@@ -76,7 +76,7 @@ public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
     public HubConnection CreateChatHubConnection(string jwt)
     {
         return new HubConnectionBuilder()
-            .WithUrl(new Uri(ClientOptions.BaseAddress, "chat"), opts =>
+            .WithUrl(new Uri(ClientOptions.BaseAddress, ChatHub.Url), opts =>
             {
                 opts.AccessTokenProvider = () => Task.FromResult(jwt)!; 
                 opts.HttpMessageHandlerFactory = _ => Server.CreateHandler();

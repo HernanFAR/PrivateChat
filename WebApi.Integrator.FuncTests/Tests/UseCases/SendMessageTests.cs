@@ -1,10 +1,10 @@
-﻿using Core.UseCases.SendMessage;
+﻿using Core.UseCases.EnterRoom;
+using Core.UseCases.SendMessage;
 using FluentAssertions;
-using System.Diagnostics.Contracts;
+using Microsoft.AspNetCore.SignalR.Client;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.SignalR.Client;
 
 namespace WebApi.Integrator.FuncTests.Tests.UseCases;
 
@@ -21,6 +21,9 @@ public class SendMessageTests : IClassFixture<TestFixture>
     public async Task SendMessage_ShouldShowUnprocessableEntity_DetailUserNotConnectedToHub()
     {
         const string roomName = "2";
+        var roomUrl = SendMessageEndpoint.Url
+            .Replace("{room}", roomName);
+
         var contract = new SendMessageContract("Testing");
 
         var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
@@ -28,7 +31,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
 
-        var response = await httpClient.PostAsJsonAsync($"/chat/{roomName}/message", contract);
+        var response = await httpClient.PostAsJsonAsync(roomUrl, contract);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 
@@ -41,6 +44,9 @@ public class SendMessageTests : IClassFixture<TestFixture>
     public async Task SendMessage_ShouldShowUnprocessableEntity_DetailMessageNotValid()
     {
         const string roomName = "2";
+        var roomUrl = SendMessageEndpoint.Url
+            .Replace("{room}", roomName);
+
         var contract = new SendMessageContract("");
 
         var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
@@ -48,7 +54,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
 
-        var response = await httpClient.PostAsJsonAsync($"/chat/{roomName}/message", contract);
+        var response = await httpClient.PostAsJsonAsync(roomUrl, contract);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 
@@ -61,6 +67,9 @@ public class SendMessageTests : IClassFixture<TestFixture>
     public async Task SendMessage_ShouldReturnNotFound()
     {
         const string roomName = "1";
+        var roomUrl = SendMessageEndpoint.Url
+            .Replace("{room}", roomName);
+
         var contract = new SendMessageContract("Testing");
 
         var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
@@ -71,7 +80,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
         await using var hub = _fixture.PrivateChatWebApi.CreateChatHubConnection(jwt);
         await hub.StartAsync();
 
-        var response = await httpClient.PostAsJsonAsync($"/chat/{roomName}/message", contract);
+        var response = await httpClient.PostAsJsonAsync(roomUrl, contract);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
     }
@@ -82,6 +91,12 @@ public class SendMessageTests : IClassFixture<TestFixture>
         var messageSend = false;
         const string roomName1 = "1";
         const string roomName2 = "2";
+        var room1EnterUrl = EnterRoomEndpoint.Url
+            .Replace("{room}", roomName1);
+        var room2EnterUrl = EnterRoomEndpoint.Url
+            .Replace("{room}", roomName2);
+        var room1MessageUrl = SendMessageEndpoint.Url
+            .Replace("{room}", roomName1);
         const string userName = "Fabian";
 
         var contract = new SendMessageContract("Testing");
@@ -101,13 +116,13 @@ public class SendMessageTests : IClassFixture<TestFixture>
         await hubFabian.StartAsync();
         await hubHernan.StartAsync();
 
-        var response1 = await httpClientHernan.PostAsJsonAsync($"/chat/{roomName1}", new object());
+        var response1 = await httpClientHernan.PostAsJsonAsync(room1EnterUrl, new object());
         response1.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var response2 = await httpClientHernan.PostAsJsonAsync($"/chat/{roomName2}", new object());
+        var response2 = await httpClientHernan.PostAsJsonAsync(room2EnterUrl, new object());
         response2.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var response3 = await httpClientFabian.PostAsJsonAsync($"/chat/{roomName1}", new object());
+        var response3 = await httpClientFabian.PostAsJsonAsync(room1EnterUrl, new object());
         response3.StatusCode.Should().Be(HttpStatusCode.OK);
 
         hubHernan.On<string, string, string, string>("ReceiveMessage", (fromUser, fromUserId, roomId, message) =>
@@ -120,7 +135,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
             messageSend = true;
         });
 
-        var response4 = await httpClientFabian.PostAsJsonAsync($"/chat/{roomName1}/message", contract);
+        var response4 = await httpClientFabian.PostAsJsonAsync(room1MessageUrl, contract);
         response4.StatusCode.Should().Be(HttpStatusCode.OK);
 
         await Task.Delay(3000);

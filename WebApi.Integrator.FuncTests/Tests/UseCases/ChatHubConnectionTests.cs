@@ -2,6 +2,7 @@ using FluentAssertions;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Mime;
+using Core.UseCases.EnterRoom;
 using CrossCutting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -50,7 +51,10 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
                 exception.Should().BeNull();
             };
 
-            var response = await httpClient.PostAsync("/chat/new_room", new StringContent("", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json)));
+            var url = EnterRoomEndpoint.Url
+                .Replace("{room}", "new_room");
+
+            var response = await httpClient.PostAsync(url, new StringContent("", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json)));
 
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 

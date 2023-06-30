@@ -1,12 +1,12 @@
-using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.RateLimiting;
 using Core.UseCases.ChatHubConnection;
 using Core.UseCases.CreateUser;
 using Core.UseCases.EnterRoom;
 using Core.UseCases.LeaveRoom;
 using Core.UseCases.SendMessage;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.OpenApi.Models;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +23,50 @@ if (builder.Environment.IsProduction())
 }
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setup =>
+{
+    setup.EnableAnnotations();
+    setup.AddSignalRSwaggerGen(ssgOptions => ssgOptions.ScanAssemblies(typeof(CrossCutting.Anchor).Assembly));
+
+    setup.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "PrivateChatWebApi",
+        Version = "v1",
+        Description = "Una WebApi open-source para mensajería instantánea, sin guardado de información en servidor",
+        Contact = new OpenApiContact
+        {
+            Name = "Hernán Álvarez",
+            Email = "h.f.alvarez.rubio@gmail.com",
+            Url = new Uri("https://www.linkedin.com/in/hernan-a-rubio/")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "MIT",
+        },
+    });
+
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "JWT Authentication",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Pon solamente tu Token JWT Bearer en el input inferior",
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+
+    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+});
 
 builder.Services.AddCrossCuttingConcerns(builder.Configuration);
 
