@@ -27,7 +27,7 @@ public class SendMessageEndpoint : IEndpointDefinition
     public void DefineEndpoint(IEndpointRouteBuilder builder)
     {
         builder.MapPost(Url, Handle)
-            .WithName(nameof(SendMessageEndpoint))
+            .WithName(nameof(SendMessage))
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
