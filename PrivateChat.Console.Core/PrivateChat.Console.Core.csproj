@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <OpenApiReference Include="OpenAPIs\swagger.json">
+      <CodeGenerator>NSwagCSharp</CodeGenerator>
+      <Namespace>PrivateChatWebApi</Namespace>
+      <ClassName>PrivateChatWebApiConnection</ClassName>
+      <SourceUri>https://privatechat-production.up.railway.app/swagger/v1/swagger.json</SourceUri>
+    </OpenApiReference>
+  </ItemGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.8" />
+	  <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="7.0.8" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="7.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.19.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="OneOf" Version="3.0.255" />
+  </ItemGroup>
+
+</Project>
