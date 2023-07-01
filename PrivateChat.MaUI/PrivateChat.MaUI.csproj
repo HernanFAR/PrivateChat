@@ -50,11 +50,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+	    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+	    <PackageReference Include="Fluxor.Blazor.Web" Version="5.9.0" />
+	    <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="5.9.0" />
+	    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PrivateChat.Core\PrivateChat.Core.csproj" />
+      <ProjectReference Include="..\PrivateChat.Views\PrivateChat.Views.csproj" />
     </ItemGroup>
 
 </Project>

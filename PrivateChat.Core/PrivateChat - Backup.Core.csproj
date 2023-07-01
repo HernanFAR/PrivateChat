@@ -7,28 +7,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="CurrieTechnologies.Razor.SweetAlert2" Version="5.5.0" />
-	<PackageReference Include="Fluxor" Version="5.9.0" />
+    <PackageReference Include="CurrieTechnologies.Razor.SweetAlert2" Version="5.5.0" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+    <PackageReference Include="Fluxor" Version="5.9.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.8" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="7.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NSwag.ApiDescription.Client" Version="13.18.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OneOf" Version="3.0.243" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UseCases\" />
   </ItemGroup>
 
   <ItemGroup>
     <OpenApiReference Include="OpenAPIs\swagger.json" CodeGenerator="NSwagCSharp" Namespace="ChatHubWebApi" ClassName="ChatHubWebApiConnection">
       <SourceUri>https://privatechat-production.up.railway.app/swagger/v1/swagger.json</SourceUri>
     </OpenApiReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\PrivateChat.CrossCutting\PrivateChat.CrossCutting.csproj" />
   </ItemGroup>
 
 </Project>
