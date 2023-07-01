@@ -1,9 +1,22 @@
 ﻿@page "/"
+@attribute [Route(Url)]
 
-<PageTitle>Index</PageTitle>
+<PageTitle>@(RoomId is null ? "Private chat" : $"Private chat: {RoomId}")</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (string.IsNullOrEmpty(RoomId))
+{
+    <RadzenText TextAlign="TextAlign.Center" 
+                TextStyle="TextStyle.H5" 
+                TagName="TagName.H1" 
+                class="rz-py-5 rz-m-0">
+        ¡Selecciona una habitación o crea una para conversar!
+    </RadzenText>
+}
 
-Welcome to your new app.
+@code
+{
+    public const string Url = "/{roomId}";
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    [Parameter]
+    public string? RoomId { get; set; }
+}

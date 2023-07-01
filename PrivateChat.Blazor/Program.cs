@@ -23,7 +23,15 @@ builder.Services.AddScoped<DialogService>();
 builder.Services.AddScoped<TooltipService>();
 builder.Services.AddScoped<NotificationService>();
 
-builder.Services.AddFluxor(options => options.ScanAssemblies(typeof(PrivateChat.Core.Anchor).Assembly));
+builder.Services
+    .AddFluxor(options =>
+    {
+        options.ScanAssemblies(typeof(PrivateChat.Core.Anchor).Assembly);
+
+#if DEBUG
+        options.UseReduxDevTools();
+#endif
+    });
 
 builder.Services.AddScoped<ChatHubConnection>();
 builder.Services.AddScoped<LoginStateProvider>();

@@ -6,11 +6,16 @@ namespace PrivateChat.Core.Store.Rooms;
 [FeatureState]
 public class RoomsState
 {
-    public RoomInformation[] LoggedRooms { get; }
+    public RoomInformation[] LoggedRooms { get; } 
 
     private RoomsState()
     {
         LoggedRooms = Array.Empty<RoomInformation>();
+        LoggedRooms = new[] 
+        { 
+            new RoomInformation(Guid.NewGuid().ToString().Replace("-", "")[..24], 1), 
+            new RoomInformation(Guid.NewGuid().ToString().Replace("-", "")[..24], 0)
+        };
     }
 
     public RoomsState(RoomInformation[] loggedRooms) : base()

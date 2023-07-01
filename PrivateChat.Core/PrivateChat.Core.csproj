@@ -8,7 +8,7 @@
 
   <ItemGroup>
 	<PackageReference Include="CurrieTechnologies.Razor.SweetAlert2" Version="5.5.0" />
-	<PackageReference Include="Fluxor" Version="5.9.0" />
+	<PackageReference Include="Fluxor.Blazor.Web" Version="5.9.0" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="7.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

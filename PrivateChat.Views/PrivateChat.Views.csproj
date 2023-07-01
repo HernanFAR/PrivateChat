@@ -18,15 +18,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PrivateChat.Core\PrivateChat.Core.csproj" />
+    <ProjectReference Include="..\PrivateChat.CrossCutting\PrivateChat.CrossCutting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Pages\Counter.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
-    <Content Update="Pages\FetchData.razor">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
     <Content Update="Pages\Index.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
