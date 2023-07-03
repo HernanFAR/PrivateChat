@@ -69,8 +69,18 @@ builder.Services.AddSwaggerGen(setup =>
     });
 });
 
-builder.Services.AddCrossCuttingConcerns(builder.Configuration);
+builder.Services.AddCors(opts =>
+{
+    opts.DefaultPolicyName = "Default";
+    opts.AddDefaultPolicy(corsBuilder =>
+    {
+        corsBuilder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
+builder.Services.AddCrossCuttingConcerns(builder.Configuration);
 builder.Services.AddEndpointDefinition<ChatHubConnectionEndpoint>();
 builder.Services.AddEndpointDefinition<CreateUserEndpoint>();
 builder.Services.AddEndpointDefinition<EnterRoomEndpoint>();
@@ -84,6 +94,7 @@ app.UseHttpsRedirection();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
