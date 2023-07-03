@@ -51,7 +51,7 @@ public class EnterRoomTests : IClassFixture<TestFixture>
         var url = EnterRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -88,7 +88,7 @@ public class EnterRoomTests : IClassFixture<TestFixture>
         var room6Url = EnterRoomEndpoint.Url
             .Replace("{room}", roomName6);
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -155,12 +155,13 @@ public class EnterRoomTests : IClassFixture<TestFixture>
         var response2 = await httpClientHernan.PostAsJsonAsync(room2Url, new object());
         response2.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        hubHernan.On<string, string, string, string>("ReceiveMessage", (fromUser, fromUserId, roomId, message) =>
+        hubHernan.On<string, string, string, string, DateTimeOffset>("ReceiveMessage", (fromUser, fromUserId, roomId, message, datetime) =>
         {
             fromUser.Should().Be(EnterRoomHandler.SystemName);
             fromUserId.Should().Be(Guid.Empty.ToString());
             roomId.Should().Be(roomName1);
             message.Should().Be(string.Format(EnterRoomHandler.SystemWelcomeMessage, userName, userIdFabian));
+            datetime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
 
             messageSend = true;
         });

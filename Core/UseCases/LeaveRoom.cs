@@ -109,7 +109,8 @@ public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
                 SystemName,
                 Guid.Empty.ToString(),
                 request.RoomId,
-                string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier));
+                string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier),
+                DateTimeOffset.Now);
 
         return new Success();
     }

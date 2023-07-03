@@ -8,10 +8,11 @@ while (true)
     var username = Console.ReadLine() ?? "";
 
     var facadeCreationResult = await PrivateChatFacade.CreateForNameAsync(username,
-        (fromUser, fromUserId, _, message) =>
+        (fromUser, fromUserId, _, message, datetime) =>
         {
             ClearCurrentConsoleLine();
-            Console.WriteLine($"{fromUser}#{fromUserId}: {message}");
+
+            Console.WriteLine($"{fromUser}#{fromUserId}: {message} - A las {datetime.DateTime}");
             Console.Write($"{username}: ");
         }, true);
 
@@ -34,7 +35,7 @@ await using (facade)
 
     while (true)
     {
-        if (message == "/salir")
+        if (message == "/salir-app")
         {
             break;
         }
@@ -64,7 +65,7 @@ await using (facade)
             Console.Write($"{facade.UserName}: ");
             message = Console.ReadLine() ?? "";
 
-            if (message is "/salir-sala" or "/salir")
+            if (message is "/salir" or "/salir-app")
             {
                 break;
             }

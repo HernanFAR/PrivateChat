@@ -46,9 +46,11 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
 
             await Task.Delay(8500);
 
-            hub.Closed += async exception =>
+            hub.Closed += exception =>
             {
                 exception.Should().BeNull();
+
+                return Task.CompletedTask;
             };
 
             var url = EnterRoomEndpoint.Url

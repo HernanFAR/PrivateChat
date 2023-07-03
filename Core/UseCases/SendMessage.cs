@@ -113,7 +113,12 @@ public class SendMessageHandler : IHandler<SendMessageCommand, Success>
 
         await _chatHub.Clients
             .GroupExcept(request.RoomId, userInfo.ConnectionId)
-            .ReceiveMessage(request.Name, request.NameIdentifier, request.RoomId, request.Message);
+            .ReceiveMessage(
+                request.Name, 
+                request.NameIdentifier, 
+                request.RoomId, 
+                request.Message,
+                DateTimeOffset.Now);
 
         return new Success();
     }

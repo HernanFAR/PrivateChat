@@ -32,7 +32,7 @@ builder.Services.AddSwaggerGen(setup =>
     setup.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "PrivateChatWebApi",
-        Version = "v1.1.1",
+        Version = "v1.2",
         Description = "Una WebApi open-source para mensajería instantánea, sin guardado de información en servidor",
         Contact = new OpenApiContact
         {
@@ -69,8 +69,18 @@ builder.Services.AddSwaggerGen(setup =>
     });
 });
 
-builder.Services.AddCrossCuttingConcerns(builder.Configuration);
+builder.Services.AddCors(opts =>
+{
+    opts.DefaultPolicyName = "Default";
+    opts.AddDefaultPolicy(corsBuilder =>
+    {
+        corsBuilder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
+builder.Services.AddCrossCuttingConcerns(builder.Configuration);
 builder.Services.AddEndpointDefinition<ChatHubConnectionEndpoint>();
 builder.Services.AddEndpointDefinition<CreateUserEndpoint>();
 builder.Services.AddEndpointDefinition<EnterRoomEndpoint>();
@@ -84,6 +94,7 @@ app.UseHttpsRedirection();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

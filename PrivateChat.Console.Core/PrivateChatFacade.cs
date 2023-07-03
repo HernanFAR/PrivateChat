@@ -16,14 +16,14 @@ public class PrivateChatFacade : IAsyncDisposable
     private readonly ILogger<PrivateChatFacade> _logger;
 
     private HubConnection? _hubConnection;
-    private Action<string, string, string, string> _onReceiveMessageAction;
+    private Action<string, string, string, string, DateTimeOffset> _onReceiveMessageAction;
 
     public string UserName { get; }
     private string? _token;
     private int _retries;
 
     private PrivateChatFacade(string userName, PrivateChatWebApiConnection connection, HttpClient client,
-        ILogger<PrivateChatFacade> logger, Action<string, string, string, string> onReceiveMessageAction)
+        ILogger<PrivateChatFacade> logger, Action<string, string, string, string, DateTimeOffset> onReceiveMessageAction)
     {
         UserName = userName;
         _connection = connection;
@@ -226,7 +226,7 @@ public class PrivateChatFacade : IAsyncDisposable
 
     public static async Task<OneOf<PrivateChatFacade, Error<string[]>>> CreateForNameAsync(
         string userName, 
-        Action<string, string, string, string> onReceiveMessageAction, 
+        Action<string, string, string, string, DateTimeOffset> onReceiveMessageAction, 
         bool showInformationalLogging = false)
     {
         var client = new HttpClient();

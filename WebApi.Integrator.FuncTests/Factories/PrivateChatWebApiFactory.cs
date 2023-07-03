@@ -24,8 +24,6 @@ namespace WebApi.Integrator.FuncTests.Factories;
 
 public class PrivateChatWebApiFactory : WebApplicationFactory<Program>
 {
-    private bool _disposed;
-
     public UserManager UserManagerInstance { get; } = new UserManager();
 
     public PrivateChatWebApiFactory()

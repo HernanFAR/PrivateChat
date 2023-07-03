@@ -106,7 +106,8 @@ public class EnterRoomHandler : IHandler<EnterRoomCommand, Success>
                 SystemName,
                 Guid.Empty.ToString(),
                 request.RoomId,
-                string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier));
+                string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier),
+                DateTimeOffset.Now);
 
         await _chatHub.Groups.AddToGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
 
