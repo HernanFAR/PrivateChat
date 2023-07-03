@@ -77,7 +77,7 @@ public class CreateUserHandler : IHandler<CreateUserCommand, CreateUserCommandRe
         _jwtConfigMonitor = jwtConfigMonitor;
     }
 
-    public async ValueTask<OneOf<CreateUserCommandResponse, BusinessFailure>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public ValueTask<OneOf<CreateUserCommandResponse, BusinessFailure>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfigMonitor.CurrentValue.IssuerSigningKey));
         var claims = new Claim[]
@@ -96,6 +96,6 @@ public class CreateUserHandler : IHandler<CreateUserCommand, CreateUserCommandRe
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
         );
 
-        return new CreateUserCommandResponse(tokenHandler.WriteToken(jwt));
+        return ValueTask.FromResult<OneOf<CreateUserCommandResponse, BusinessFailure>>(new CreateUserCommandResponse(tokenHandler.WriteToken(jwt)));
     }
 }

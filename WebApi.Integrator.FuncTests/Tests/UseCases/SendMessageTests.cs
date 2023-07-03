@@ -26,7 +26,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
 
         var contract = new SendMessageContract("Testing");
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -49,7 +49,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
 
         var contract = new SendMessageContract("");
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -72,7 +72,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
 
         var contract = new SendMessageContract("Testing");
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -125,12 +125,13 @@ public class SendMessageTests : IClassFixture<TestFixture>
         var response3 = await httpClientFabian.PostAsJsonAsync(room1EnterUrl, new object());
         response3.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        hubHernan.On<string, string, string, string>("ReceiveMessage", (fromUser, fromUserId, roomId, message) =>
+        hubHernan.On<string, string, string, string, DateTimeOffset>("ReceiveMessage", (fromUser, fromUserId, roomId, message, datetime) =>
         {
             fromUser.Should().Be(userName);
             fromUserId.Should().Be(userIdFabian);
             roomId.Should().Be(roomName1);
             message.Should().Be(contract.Message);
+            datetime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
 
             messageSend = true;
         });
