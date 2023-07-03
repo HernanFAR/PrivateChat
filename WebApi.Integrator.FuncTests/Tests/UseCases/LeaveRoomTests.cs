@@ -3,6 +3,7 @@ using CrossCutting;
 using FluentAssertions;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -52,7 +53,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var roomUrl = LeaveRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -73,7 +74,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var roomUrl = LeaveRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -96,7 +97,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var room1Url = LeaveRoomEndpoint.Url
             .Replace("{room}", roomName1);
         var room2Url = LeaveRoomEndpoint.Url
-            .Replace("{room}", roomName1);
+            .Replace("{room}", roomName2);
 
         const string userName = "Fabian";
 
@@ -124,12 +125,13 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var response3 = await httpClientFabian.PostAsJsonAsync(room1Url, new object());
         response3.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        hubHernan.On<string, string, string, string>("ReceiveMessage", (fromUser, fromUserId, roomId, message) =>
+        hubHernan.On<string, string, string, string, DateTimeOffset>("ReceiveMessage", (fromUser, fromUserId, roomId, message, datetime) =>
         {
             fromUser.Should().Be(LeaveRoomHandler.SystemName);
             fromUserId.Should().Be(Guid.Empty.ToString());
             roomId.Should().Be(roomName1);
             message.Should().Be(string.Format(LeaveRoomHandler.SystemWelcomeMessage, userName, userIdFabian));
+            datetime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
 
             messageSend = true;
         });

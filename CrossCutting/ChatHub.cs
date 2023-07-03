@@ -11,7 +11,7 @@ public interface IChatHub
     [SignalRMethod("[Method]", Operation.Get, 
         summary: "Websocket para recibir los mensajes", 
         description: $"Debes escuchar {nameof(ReceiveMessage)}, en \"{ChatHub.Url}\" con los siguientes parámetros, accionado cada vez que recibes un mensaje en una habitación" )]
-    Task ReceiveMessage(string fromUser, string fromUserId, string roomId, string message);
+    Task ReceiveMessage(string fromUser, string fromUserId, string roomId, string message, DateTimeOffset sendDateTime);
     
 }
 
@@ -53,7 +53,12 @@ public class ChatHub : Hub<IChatHub>
         foreach (var roomId in rooms)
         {
             await Clients.Group(roomId)
-                .ReceiveMessage("System", Guid.Empty.ToString(), roomId, $"Se ha desconectado {name}#{nameIdentifier}");
+                .ReceiveMessage(
+                    "System", 
+                    Guid.Empty.ToString().Replace("-", ""), 
+                    roomId, 
+                    $"Se ha desconectado {name}#{nameIdentifier}", 
+                    DateTimeOffset.Now);
         }
 
         userManager.RemoveUser(nameIdentifier);
