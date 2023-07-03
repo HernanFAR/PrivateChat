@@ -24,11 +24,30 @@ public class RoomsState
     }
 }
 
+public record EnterRoomAction(string Id);
+public record LeaveRoomAction(string Id);
 public record RoomIncomingMessageAction(string Id);
 public record ClearUnreadMessagesAction(string Id);
 
 public static class RoomsReducers
 {
+    [ReducerMethod]
+    public static RoomsState EnterRoomReducer(RoomsState state, EnterRoomAction action)
+    {
+        var room = new RoomInformation(action.Id, 0);
+
+        return new RoomsState(state.LoggedRooms.Prepend(room).ToArray());
+
+    }
+
+    [ReducerMethod]
+    public static RoomsState LeaveRoomReducer(RoomsState state, LeaveRoomAction action)
+    {
+        return new RoomsState(state.LoggedRooms
+            .Where(e => e.Id == action.Id)
+            .ToArray());
+    }
+
     [ReducerMethod]
     public static RoomsState IncomingMessageReducer(RoomsState state, RoomIncomingMessageAction action)
     {

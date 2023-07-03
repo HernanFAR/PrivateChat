@@ -8,7 +8,7 @@ using PrivateChat.CrossCutting.Abstractions;
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.CreateUser;
 
-public record CreateUserCommand(string Name);
+public record CreateUserCommand(string Name, bool Relogin);
 
 public class CreateUserHandler
 {
@@ -31,7 +31,7 @@ public class CreateUserHandler
     {
         try
         {
-            _ = _swal.FireBlockedMessageAsync("Iniciando sesión", "¡Espera un momento!");
+            _ = _swal.FireBlockedMessageAsync(request.Relogin ? "Se finalizo tú sesión, volviendo a iniciar" : "Iniciando sesión", "¡Espera un momento!");
 
             var token = await HandleCoreAsync(request, cancellationToken);
 
@@ -48,14 +48,21 @@ public class CreateUserHandler
                 apiException.Result,
                 SweetAlertIcon.Warning);
 
+            return new Error();
         }
         catch (ApiException ex)
             when (ex.StatusCode == 429)
         {
-            _ = _swal.FireAsync("Se ha producido un error interno", "Intente más tarde", SweetAlertIcon.Error);
-        }
+            _ = _swal.FireAsync("Se han enviado muchas peticiones", "Intente más tarde", SweetAlertIcon.Error);
 
-        return new Error();
+            return new Error();
+        }
+        catch (ApiException ex)
+        {
+            _ = _swal.FireAsync("Se ha producido un error interno", "Intente más tarde", SweetAlertIcon.Error);
+
+            return new Error();
+        }
     }
 
     private async Task<string> HandleCoreAsync(CreateUserCommand request, CancellationToken cancellationToken)

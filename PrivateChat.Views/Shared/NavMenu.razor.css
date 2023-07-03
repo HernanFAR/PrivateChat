@@ -1,3 +1,7 @@
+.active {
+    text-decoration: underline !important;
+}
+
 .product-title {
     min-height: 72px;
     background-color: var(--rz-secondary-lighter);

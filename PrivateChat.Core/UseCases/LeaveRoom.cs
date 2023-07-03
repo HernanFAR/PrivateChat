@@ -11,6 +11,7 @@ using Fluxor;
 using Microsoft.Extensions.Logging;
 using PrivateChat.Core.Structs;
 using PrivateChat.CrossCutting.Abstractions;
+using PrivateChat.Core.Store.Rooms;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.LeaveRoom;
@@ -22,22 +23,29 @@ public class LeaveRoomHandler
     private readonly SweetAlertService _swal;
     private readonly ChatHubWebApiConnection _chatHubWebApi;
     private readonly ILogger<LeaveRoomHandler> _logger;
+    private readonly IDispatcher _dispatcher;
     private int _retries;
 
     public LeaveRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
-        ILogger<LeaveRoomHandler> logger)
+        ILogger<LeaveRoomHandler> logger, IDispatcher dispatcher)
     {
         _swal = swal;
         _chatHubWebApi = chatHubWebApi;
         _logger = logger;
+        _dispatcher = dispatcher;
     }
 
     public async ValueTask<OneOf<Success, Error, AuthenticationFailure>> HandleAsync(LeaveRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         try
         {
+            _ = _swal.FireUncloseableToastMessageAsync($"Saliendo de {request.Id}!", "");
+
             await HandleCoreAsync(request, cancellationToken);
-            
+            _dispatcher.Dispatch(new LeaveRoomAction(request.Id));
+
+            _ = _swal.FireTimedToastMessageAsync($"¡Saliste correctamente!", "", SweetAlertIcon.Info);
+
             return new Success();
         }
         catch (ApiException ex)
@@ -52,6 +60,12 @@ public class LeaveRoomHandler
         }
         catch (ApiException ex)
             when (ex.StatusCode == 429)
+        {
+            _ = _swal.FireAsync("Se han enviado muchas peticiones", "Intente más tarde", SweetAlertIcon.Error);
+
+            return new Error();
+        }
+        catch (ApiException ex)
         {
             _ = _swal.FireAsync("Se ha producido un error interno", "Intente más tarde", SweetAlertIcon.Error);
 

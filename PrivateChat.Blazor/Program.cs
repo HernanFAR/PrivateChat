@@ -1,3 +1,5 @@
+using Blazored.LocalStorage;
+using ChatHubWebApi;
 using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -33,11 +35,13 @@ builder.Services
 #endif
     });
 
-builder.Services.AddScoped<ChatHubConnection>();
+builder.Services.AddScoped<ChatHubWebApiConnection>();
+builder.Services.AddScoped<ChatHubWebApiConnection.ChatHub>();
 builder.Services.AddScoped<LoginStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<LoginStateProvider>());
 builder.Services.AddScoped<IApplicationLoginProvider>(sp => sp.GetRequiredService<LoginStateProvider>());
 builder.Services.AddScoped<IApplicationStorage, BrowserLocalStorage>();
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSweetAlert2();
 
 builder.Services.AddScoped<CreateUserHandler>();

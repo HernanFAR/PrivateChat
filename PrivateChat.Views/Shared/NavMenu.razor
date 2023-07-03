@@ -6,7 +6,7 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href=""><h3>Chat privado v1</h3></a>
+        <a class="navbar-brand" href=""><h3>Private Chat v1</h3></a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -16,7 +16,7 @@
 <div class="@NavMenuCssClass nav-scrollable">
     <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" class="rz-pb-4">
         <p class="text-center rz-m-0 rz-pt-4">
-            <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="@OpenAddRoomDialog">
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@OpenAddRoomDialog">
                 <RadzenText TextStyle="TextStyle.Body1" class="rz-color-white rz-m-0">
                     Ingresar a habitación
                 </RadzenText>
@@ -30,11 +30,13 @@
                          @onclick="ToggleNavMenu"
                          href="@Index.Url.Replace("{roomId}", room.Id)">
                     <RadzenCard Style="width: 100%; padding: 0;" class="rz-pl-2 rz-py-6 product-title">
-                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-secondary rz-m-0">
+                        <RadzenText TextStyle="TextStyle.H6" 
+                                    TagName="TagName.H5"
+                                    class="rz-color-primary rz-m-0">
                             @(room.Id)
                             @if (room.UnreadMessages != 0)
                             {
-                                <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@room.UnreadMessages.ToString()" class="rz-ml-2"/>
+                                <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@room.UnreadMessages.ToString()" class="rz-ml-2" />
                             }
                         </RadzenText>
                     </RadzenCard>

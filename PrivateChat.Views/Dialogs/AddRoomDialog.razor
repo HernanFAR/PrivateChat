@@ -1,5 +1,50 @@
-﻿<h3>AddRoomDialog</h3>
+﻿@using PrivateChat.Core.UseCases.EnterRoom
+@using PrivateChat.Core.UseCases.CreateUser
+@using Microsoft.Extensions.Logging
+
+@inject EnterRoomHandler EnterRoomHandler
+@inject CreateUserHandler CreateUserHandler
+@inject DialogService DialogService
+@inject ILogger<AddRoomDialog> Logger
+
+<EditForm Model="_enterRoomCommand" OnValidSubmit="SubmitForm">
+    <RadzenText TextStyle="TextStyle.Subtitle1" TagName="TagName.H3">Nombre habitación: </RadzenText>
+    <RadzenTextBox @bind-Value="_enterRoomCommand.Id" MaxLength="5" class="w-100 rz-mb-2" />
+    
+    <p class="text-center rz-mb-0">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Entrar a habitación" />
+
+        <RadzenButton Click="DialogService.Close"
+                      ButtonStyle="ButtonStyle.Secondary"
+                      class="rz-ml-2"
+                      Text="Cerrar" />
+    </p>
+</EditForm>
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    readonly EnterRoomCommand _enterRoomCommand = new();
+
+    private async Task SubmitForm()
+    {
+        var result = await EnterRoomHandler.HandleAsync(_enterRoomCommand, CancellationToken.None);
+
+        if (result.IsT2)
+        {
+            if (AuthStateTask is null)
+            {
+                Logger.LogWarning("No se ha recibido el campo {FieldName}", nameof(AuthStateTask));
+                return;
+            }
+
+            var authState = await AuthStateTask;
+            var createUserCommand = new CreateUserCommand(authState.User.Identity?.Name ?? "", true);
+
+            await CreateUserHandler.HandleAsync(createUserCommand, CancellationToken.None);
+        }
+    }
 
 }

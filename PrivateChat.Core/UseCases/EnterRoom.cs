@@ -9,27 +9,33 @@ using ChatHubWebApi;
 using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.Extensions.Logging;
+using PrivateChat.Core.Store.Rooms;
 using PrivateChat.Core.Structs;
 using PrivateChat.CrossCutting.Abstractions;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.EnterRoom;
 
-public record EnterRoomCommand(string Id);
+public class EnterRoomCommand
+{
+    public string Id { get; set; } = string.Empty;
+}
 
 public class EnterRoomHandler
 {
     private readonly SweetAlertService _swal;
     private readonly ChatHubWebApiConnection _chatHubWebApi;
     private readonly ILogger<EnterRoomHandler> _logger;
+    private readonly IDispatcher _dispatcher;
     private int _retries;
 
     public EnterRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
-        ILogger<EnterRoomHandler> logger)
+        ILogger<EnterRoomHandler> logger, IDispatcher dispatcher)
     {
         _swal = swal;
         _chatHubWebApi = chatHubWebApi;
         _logger = logger;
+        _dispatcher = dispatcher;
     }
 
     public async ValueTask<OneOf<Success, Error, AuthenticationFailure>> HandleAsync(EnterRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
@@ -39,7 +45,8 @@ public class EnterRoomHandler
             _ = _swal.FireBlockedMessageAsync("Entrando a habitación sesión", "¡Espera un momento!");
 
             await HandleCoreAsync(request, cancellationToken);
-            
+            _dispatcher.Dispatch(new EnterRoomAction(request.Id));
+
             _ = _swal.FireTimedToastMessageAsync($"¡Bienvenido a {request.Id}!", "", SweetAlertIcon.Info);
 
             return new Success();
@@ -60,6 +67,12 @@ public class EnterRoomHandler
         }
         catch (ApiException ex)
             when (ex.StatusCode == 429)
+        {
+            _ = _swal.FireAsync("Se han enviado muchas peticiones", "Intente más tarde", SweetAlertIcon.Error);
+
+            return new Error();
+        }
+        catch (Exception ex)
         {
             _ = _swal.FireAsync("Se ha producido un error interno", "Intente más tarde", SweetAlertIcon.Error);
 
