@@ -15,34 +15,54 @@
 
 <div class="@NavMenuCssClass nav-scrollable">
     <RadzenStack Orientation="Orientation.Vertical" JustifyContent="JustifyContent.Center" class="rz-pb-4">
-        <p class="text-center rz-m-0 rz-pt-4">
-            <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@OpenAddRoomDialog">
-                <RadzenText TextStyle="TextStyle.Body1" class="rz-color-white rz-m-0">
-                    Ingresar a habitación
-                </RadzenText>
-            </RadzenButton>
-        </p>
-        @foreach (var room in RoomsState.Value.LoggedRooms)
-        {
-            <div class="rz-px-4 rz-py-0">
-                <NavLink Match="NavLinkMatch.All"
-                         class="text-decoration-none"
-                         @onclick="ToggleNavMenu"
-                         href="@Index.Url.Replace("{roomId}", room.Id)">
-                    <RadzenCard Style="width: 100%; padding: 0;" class="rz-pl-2 rz-py-6 product-title">
-                        <RadzenText TextStyle="TextStyle.H6" 
-                                    TagName="TagName.H5"
-                                    class="rz-color-primary rz-m-0">
-                            @(room.Id)
-                            @if (room.UnreadMessages != 0)
-                            {
-                                <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@room.UnreadMessages.ToString()" class="rz-ml-2" />
-                            }
+        <AuthorizeView>
+            <Authorized>
+                <p class="text-center rz-m-0 rz-pt-4">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@OpenAddRoomDialog">
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-color-white rz-m-0">
+                            Ingresar a habitación
                         </RadzenText>
-                    </RadzenCard>
-                </NavLink>
-            </div>
-        }
+                    </RadzenButton>
+                </p>
+                <p class="text-center rz-m-0 rz-pt-2">
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="@(() => OpenCreateUserDialog(true))">
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-color-white rz-m-0">
+                            Cambiar nombre
+                        </RadzenText>
+                    </RadzenButton>
+                </p>
+                @foreach (var room in RoomsState.Value.LoggedRooms)
+                {
+                    <div class="rz-px-4 rz-py-0">
+                        <NavLink Match="NavLinkMatch.All"
+                                 class="text-decoration-none"
+                                 @onclick="ToggleNavMenu"
+                                 href="@Index.Url.Replace("{roomId}", room.Id)">
+                            <RadzenCard Style="width: 100%; padding: 0;" class="rz-pl-2 rz-py-6 product-title">
+                                <RadzenText TextStyle="TextStyle.H6"
+                                            TagName="TagName.H5"
+                                            class="rz-color-primary rz-m-0">
+                                    @(room.Id)
+                                    @if (room.UnreadMessages != 0)
+                                    {
+                                        <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@room.UnreadMessages.ToString()" class="rz-ml-2"/>
+                                    }
+                                </RadzenText>
+                            </RadzenCard>
+                        </NavLink>
+                    </div>
+                }
+            </Authorized>
+            <NotAuthorized>
+                <p class="text-center rz-m-0 rz-pt-4">
+                    <RadzenButton Click="@(() => OpenCreateUserDialog(false))">
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-color-white rz-m-0">
+                            Identifícate acá
+                        </RadzenText>
+                    </RadzenButton>
+                </p>
+            </NotAuthorized>
+        </AuthorizeView>
     </RadzenStack>
 </div>
 
@@ -58,7 +78,12 @@
 
     private async Task OpenAddRoomDialog()
     {
-        await DialogService.OpenAsync<AddRoomDialog>("Ingresar a habitación");
+        await DialogService.OpenAsync<EnterRoomDialog>("Ingresar a habitación");
+    }
+
+    private async Task OpenCreateUserDialog(bool changeName)
+    {
+        await DialogService.OpenAsync<CreateUserDialog>(changeName ? "Cambia tu identificador" : "Identifícate");
     }
 
 }

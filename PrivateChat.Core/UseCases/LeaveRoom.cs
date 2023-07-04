@@ -10,7 +10,6 @@ using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.Extensions.Logging;
 using PrivateChat.Core.Structs;
-using PrivateChat.CrossCutting.Abstractions;
 using PrivateChat.Core.Store.Rooms;
 
 // ReSharper disable once CheckNamespace

@@ -3,12 +3,18 @@ using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.Extensions.Logging;
 using OneOf.Types;
 using OneOf;
-using PrivateChat.CrossCutting.Abstractions;
+using PrivateChat.Core.Abstractions;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.CreateUser;
 
-public record CreateUserCommand(string Name, bool Relogin);
+public class CreateUserCommand
+{
+    public string Name { get; set; } = string.Empty;
+
+    public bool Relogin { get; set; }
+    
+}
 
 public class CreateUserHandler
 {
@@ -31,10 +37,11 @@ public class CreateUserHandler
     {
         try
         {
-            _ = _swal.FireBlockedMessageAsync(request.Relogin ? "Se finalizo tú sesión, volviendo a iniciar" : "Iniciando sesión", "¡Espera un momento!");
+            _ = _swal.FireBlockedMessageAsync(request.Relogin ? "Volviendo a iniciar" : "Iniciando sesión", "¡Espera un momento!");
 
             var token = await HandleCoreAsync(request, cancellationToken);
 
+            await _applicationLoginProvider.Logout(cancellationToken);
             await _applicationLoginProvider.Login(token, cancellationToken);
 
             _ = _swal.FireTimedToastMessageAsync("¡Sesión iniciada!", "", SweetAlertIcon.Info);

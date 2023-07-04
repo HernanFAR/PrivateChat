@@ -19,7 +19,7 @@ public class MessagesState
     }
 }
 
-public record IncomingMessageAction(string FromName, string FromId, string RoomId, string Message);
+public record IncomingMessageAction(string FromName, string FromId, string RoomId, string Message, DateTimeOffset Send);
 
 public static class MessagesReducers
 {

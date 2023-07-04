@@ -3,15 +3,28 @@
 
 <PageTitle>@(RoomId is null ? "Private chat" : $"Private chat: {RoomId}")</PageTitle>
 
-@if (string.IsNullOrEmpty(RoomId))
-{
-    <RadzenText TextAlign="TextAlign.Center" 
-                TextStyle="TextStyle.H5" 
-                TagName="TagName.H1" 
-                class="rz-py-5 rz-m-0">
-        ¡Selecciona una habitación o crea una para conversar!
-    </RadzenText>
-}
+
+<AuthorizeView>
+    <Authorized>
+        @if (string.IsNullOrEmpty(RoomId))
+        {
+            <RadzenText TextAlign="TextAlign.Center" 
+                        TextStyle="TextStyle.H5" 
+                        TagName="TagName.H1" 
+                        class="rz-py-5 rz-m-0">
+                ¡Selecciona una habitación o crea una para conversar!
+            </RadzenText>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RadzenText TextAlign="TextAlign.Center" 
+                    TextStyle="TextStyle.H5" 
+                    TagName="TagName.H1" 
+                    class="rz-py-5 rz-m-0">
+            ¡Crea un identificador para poder usar la app!
+        </RadzenText>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code
 {

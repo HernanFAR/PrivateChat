@@ -5,11 +5,11 @@
 @inject EnterRoomHandler EnterRoomHandler
 @inject CreateUserHandler CreateUserHandler
 @inject DialogService DialogService
-@inject ILogger<AddRoomDialog> Logger
+@inject ILogger<EnterRoomDialog> Logger
 
 <EditForm Model="_enterRoomCommand" OnValidSubmit="SubmitForm">
     <RadzenText TextStyle="TextStyle.Subtitle1" TagName="TagName.H3">Nombre habitación: </RadzenText>
-    <RadzenTextBox @bind-Value="_enterRoomCommand.Id" MaxLength="5" class="w-100 rz-mb-2" />
+    <RadzenTextBox @bind-Value="_enterRoomCommand.Id" MaxLength="28" class="w-100 rz-mb-2" />
     
     <p class="text-center rz-mb-0">
         <RadzenButton ButtonType="ButtonType.Submit"
@@ -32,6 +32,8 @@
     {
         var result = await EnterRoomHandler.HandleAsync(_enterRoomCommand, CancellationToken.None);
 
+        if (result.IsT0) DialogService.Close();
+
         if (result.IsT2)
         {
             if (AuthStateTask is null)
@@ -41,7 +43,11 @@
             }
 
             var authState = await AuthStateTask;
-            var createUserCommand = new CreateUserCommand(authState.User.Identity?.Name ?? "", true);
+            var createUserCommand = new CreateUserCommand
+            {
+                Name = authState.User.Identity?.Name ?? "",
+                Relogin = true
+            };
 
             await CreateUserHandler.HandleAsync(createUserCommand, CancellationToken.None);
         }

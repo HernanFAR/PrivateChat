@@ -1,8 +1,8 @@
-﻿using Blazored.LocalStorage;
+﻿using Blazored.SessionStorage;
 
-namespace PrivateChat.CrossCutting.Abstractions;
+namespace PrivateChat.Core.Abstractions;
 
-public interface IApplicationStorage
+public interface ISessionStorage
 {
     ValueTask SetItemAsync<T>(string key, T item, CancellationToken cancellationToken = default);
 
@@ -15,12 +15,12 @@ public interface IApplicationStorage
     ValueTask<bool> ContainKey(string key, CancellationToken cancellationToken = default);
 }
 
-public class BrowserLocalStorage : IApplicationStorage
+public class BrowserSessionStorage : ISessionStorage
 {
-    private readonly ILocalStorageService _localStorageService;
-    private readonly ISyncLocalStorageService _syncLocalStorageService;
+    private readonly ISessionStorageService _localStorageService;
+    private readonly ISyncSessionStorageService _syncLocalStorageService;
 
-    public BrowserLocalStorage(ILocalStorageService localStorageService, ISyncLocalStorageService syncLocalStorageService)
+    public BrowserSessionStorage(ISessionStorageService localStorageService, ISyncSessionStorageService syncLocalStorageService)
     {
         _localStorageService = localStorageService;
         _syncLocalStorageService = syncLocalStorageService;

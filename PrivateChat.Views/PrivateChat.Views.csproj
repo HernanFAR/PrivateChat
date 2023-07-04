@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PrivateChat.Core\PrivateChat.Core.csproj" />
-    <ProjectReference Include="..\PrivateChat.CrossCutting\PrivateChat.CrossCutting.csproj" />
   </ItemGroup>
 
   <ItemGroup>

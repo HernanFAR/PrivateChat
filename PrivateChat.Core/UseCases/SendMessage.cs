@@ -5,10 +5,10 @@ using Fluxor;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
+using PrivateChat.Core.Abstractions;
 using PrivateChat.Core.Store.Messages;
 using PrivateChat.Core.Store.Rooms;
 using PrivateChat.Core.Structs;
-using PrivateChat.CrossCutting.Abstractions;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.SendMessage;
@@ -55,7 +55,8 @@ public class SendMessageHandler
                 state.User.Identity.Name, 
                 state.User.GetNameIdentifier(), 
                 request.RoomId, 
-                request.Message));
+                request.Message,
+                DateTimeOffset.Now));
 
             _ = _swal.FireTimedToastMessageAsync($"¡Bienvenido a {request.RoomId}!", "", SweetAlertIcon.Info);
 

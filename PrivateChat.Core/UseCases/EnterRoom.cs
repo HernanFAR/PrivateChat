@@ -9,9 +9,9 @@ using ChatHubWebApi;
 using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.Extensions.Logging;
+using PrivateChat.Core.Store.Messages;
 using PrivateChat.Core.Store.Rooms;
 using PrivateChat.Core.Structs;
-using PrivateChat.CrossCutting.Abstractions;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.EnterRoom;
@@ -25,21 +25,31 @@ public class EnterRoomHandler
 {
     private readonly SweetAlertService _swal;
     private readonly ChatHubWebApiConnection _chatHubWebApi;
+    private readonly ChatHubWebApiConnection.ChatHub _chatHub;
     private readonly ILogger<EnterRoomHandler> _logger;
     private readonly IDispatcher _dispatcher;
     private int _retries;
 
-    public EnterRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
-        ILogger<EnterRoomHandler> logger, IDispatcher dispatcher)
+    public EnterRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi, 
+        ChatHubWebApiConnection.ChatHub chatHub, ILogger<EnterRoomHandler> logger, 
+        IDispatcher dispatcher)
     {
         _swal = swal;
         _chatHubWebApi = chatHubWebApi;
+        _chatHub = chatHub;
         _logger = logger;
         _dispatcher = dispatcher;
     }
 
     public async ValueTask<OneOf<Success, Error, AuthenticationFailure>> HandleAsync(EnterRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
+        _ = _swal.FireBlockedMessageAsync("Conectado con el chat", "Espera un momento!");
+        await _chatHub.StartIfNotConnectedAsync((userName, userId, roomId, message, dateTime) =>
+        {
+            _dispatcher.Dispatch(new RoomIncomingMessageAction(roomId));
+            _dispatcher.Dispatch(new IncomingMessageAction(userName, userId, roomId, message, dateTime));
+        });
+
         try
         {
             _ = _swal.FireBlockedMessageAsync("Entrando a habitación sesión", "¡Espera un momento!");

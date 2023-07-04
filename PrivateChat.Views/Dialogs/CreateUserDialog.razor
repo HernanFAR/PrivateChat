@@ -1,0 +1,39 @@
+﻿@using PrivateChat.Core.UseCases.CreateUser
+
+@inject CreateUserHandler CreateUserHandler
+@inject DialogService DialogService
+
+<EditForm Model="_createUserCommand" OnValidSubmit="SubmitForm">
+    <RadzenText TextStyle="TextStyle.Subtitle1" TagName="TagName.H3">Nombre: </RadzenText>
+    <RadzenTextBox @bind-Value="_createUserCommand.Name" MaxLength="32" class="w-100 rz-mb-2" />
+
+    <p class="text-center rz-mb-0">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Iniciar sesión" />
+
+        <RadzenButton Click="DialogService.Close"
+                      ButtonStyle="ButtonStyle.Secondary"
+                      Text="Cerrar"
+                      class="rz-ml-2" />
+    </p>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState>? AuthStateTask { get; set; }
+    
+    readonly CreateUserCommand _createUserCommand = new();
+
+    async Task SubmitForm()
+    {
+        _createUserCommand.Relogin = false;
+
+        var result = await CreateUserHandler.HandleAsync(_createUserCommand, CancellationToken.None);
+
+        if (result.IsT0)
+        {
+            DialogService.Close();
+        }
+    }
+
+}
