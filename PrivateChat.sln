@@ -23,11 +23,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{F277
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "frontend", "frontend", "{3EE6880F-D3C8-4EFD-9E6C-8646DFC39BCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrivateChat.Console", "PrivateChat.Console\PrivateChat.Console.csproj", "{4078A68A-46B8-4839-A74F-EDFCD9828D3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrivateChat.Console", "PrivateChat.Console\PrivateChat.Console.csproj", "{4078A68A-46B8-4839-A74F-EDFCD9828D3B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Console", "Console", "{D3F827FB-A434-41F6-AE48-98E0466CB8B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrivateChat.Console.Core", "PrivateChat.Console.Core\PrivateChat.Console.Core.csproj", "{1E07631E-1094-4B7C-BC4A-6D0C41478DAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrivateChat.Console.Core", "PrivateChat.Console.Core\PrivateChat.Console.Core.csproj", "{1E07631E-1094-4B7C-BC4A-6D0C41478DAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

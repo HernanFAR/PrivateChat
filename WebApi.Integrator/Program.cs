@@ -72,12 +72,10 @@ builder.Services.AddSwaggerGen(setup =>
 builder.Services.AddCors(opts =>
 {
     opts.DefaultPolicyName = "Default";
-    opts.AddDefaultPolicy(corsBuilder =>
-    {
-        corsBuilder.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+    opts.AddDefaultPolicy(corsBuilder => corsBuilder.SetIsOriginAllowed((host) => true)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials());
 });
 
 builder.Services.AddCrossCuttingConcerns(builder.Configuration);
