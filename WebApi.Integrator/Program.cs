@@ -32,7 +32,7 @@ builder.Services.AddSwaggerGen(setup =>
     setup.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "PrivateChatWebApi",
-        Version = "v1.2",
+        Version = "v1.2.1",
         Description = "Una WebApi open-source para mensajería instantánea, sin guardado de información en servidor",
         Contact = new OpenApiContact
         {
@@ -72,12 +72,10 @@ builder.Services.AddSwaggerGen(setup =>
 builder.Services.AddCors(opts =>
 {
     opts.DefaultPolicyName = "Default";
-    opts.AddDefaultPolicy(corsBuilder =>
-    {
-        corsBuilder.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+    opts.AddDefaultPolicy(corsBuilder => corsBuilder.SetIsOriginAllowed((host) => true)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials());
 });
 
 builder.Services.AddCrossCuttingConcerns(builder.Configuration);
