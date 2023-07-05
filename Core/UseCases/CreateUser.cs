@@ -7,14 +7,13 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using OneOf;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using VSlices.Core.Abstracts.BusinessLogic;
-using VSlices.Core.Abstracts.Presentation;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
+using VSlices.Core.Presentation.AspNetCore;
 
 // ReSharper disable once CheckNamespace
 namespace Core.UseCases.CreateUser;
@@ -77,7 +76,7 @@ public class CreateUserHandler : IHandler<CreateUserCommand, CreateUserCommandRe
         _jwtConfigMonitor = jwtConfigMonitor;
     }
 
-    public ValueTask<OneOf<CreateUserCommandResponse, BusinessFailure>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public ValueTask<Response<CreateUserCommandResponse>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfigMonitor.CurrentValue.IssuerSigningKey));
         var claims = new Claim[]
@@ -96,6 +95,6 @@ public class CreateUserHandler : IHandler<CreateUserCommand, CreateUserCommandRe
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
         );
 
-        return ValueTask.FromResult<OneOf<CreateUserCommandResponse, BusinessFailure>>(new CreateUserCommandResponse(tokenHandler.WriteToken(jwt)));
+        return ValueTask.FromResult<Response<CreateUserCommandResponse>>(new CreateUserCommandResponse(tokenHandler.WriteToken(jwt)));
     }
 }
