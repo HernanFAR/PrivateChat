@@ -1,8 +1,9 @@
 ﻿@page "/"
 @attribute [Route(Url)]
 
-<PageTitle>@(RoomId is null ? "Private chat" : $"Private chat: {RoomId}")</PageTitle>
+@using PrivateChat.Views.Components.Index
 
+<PageTitle>@(RoomId is null ? "Private chat" : $"Private chat: {RoomId}")</PageTitle>
 
 <AuthorizeView>
     <Authorized>
@@ -14,6 +15,10 @@
                         class="rz-py-5 rz-m-0">
                 ¡Selecciona una habitación o crea una para conversar!
             </RadzenText>
+        }
+        else
+        {
+            <RoomMessages RoomId="RoomId"/>
         }
     </Authorized>
     <NotAuthorized>

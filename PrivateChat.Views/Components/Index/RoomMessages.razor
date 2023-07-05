@@ -1,0 +1,13 @@
+﻿@using System.Text.Json
+<h3>RoomMessages</h3>
+
+@inject IState<MessagesState> MessagesState
+
+<p>@JsonSerializer.Serialize(MessagesState.Value.RoomMessages.Where(e => e.RoomId == RoomId))</p>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string RoomId { get; set; } = string.Empty;
+
+}

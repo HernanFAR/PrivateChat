@@ -1,10 +1,13 @@
 ﻿@using PrivateChat.Core.UseCases.EnterRoom
 @using PrivateChat.Core.UseCases.CreateUser
 @using Microsoft.Extensions.Logging
+@using CurrieTechnologies.Razor.SweetAlert2
 
 @inject EnterRoomHandler EnterRoomHandler
 @inject CreateUserHandler CreateUserHandler
 @inject DialogService DialogService
+@inject SweetAlertService Swal
+@inject IState<RoomsState> RoomsState
 @inject ILogger<EnterRoomDialog> Logger
 
 <EditForm Model="_enterRoomCommand" OnValidSubmit="SubmitForm">

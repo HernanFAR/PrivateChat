@@ -8,7 +8,8 @@ namespace ChatHubWebApi;
 
 public partial class ChatHubWebApiConnection
 {
-    public static readonly Uri ServiceUrl = new("https://privatechat-production.up.railway.app");
+    //public static readonly Uri ServiceUrl = new("https://privatechat-production.up.railway.app");
+    public static readonly Uri ServiceUrl = new("https://localhost:7253");
     private readonly ILogger<ChatHubWebApiConnection> _logger;
 
     public ChatHubWebApiConnection(HttpClient httpClient,
@@ -61,15 +62,7 @@ public partial class ChatHubWebApiConnection
         {
             if (!_connected)
             {
-                _connected = true;
-                _onReceivingMessageAction = onReceiveMessage;
-
-                _connection = BuildHubConnection();
-                await _connection.StartAsync();
-
-                _receiveSuscription = _connection.On("ReceiveMessage", _onReceivingMessageAction);
-
-                _connection.Closed += OnHubConnectionClosedAsync;
+                await StartAsync(onReceiveMessage);
             }
         }
 
@@ -90,15 +83,7 @@ public partial class ChatHubWebApiConnection
         {
             if (_connected)
             {
-                _connected = false;
-                _receiveSuscription?.Dispose();
-
-                if (_connection is null) throw new InvalidOperationException(nameof(_connected));
-
-                _connection.Closed -= OnHubConnectionClosedAsync;
-                await _connection.DisposeAsync();
-
-                GC.SuppressFinalize(this);
+                await DisposeAsync();
             }
         }
 

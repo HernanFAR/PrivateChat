@@ -26,23 +26,32 @@ public class EnterRoomHandler
     private readonly SweetAlertService _swal;
     private readonly ChatHubWebApiConnection _chatHubWebApi;
     private readonly ChatHubWebApiConnection.ChatHub _chatHub;
+    private readonly IState<RoomsState> _roomsState;
     private readonly ILogger<EnterRoomHandler> _logger;
     private readonly IDispatcher _dispatcher;
     private int _retries;
 
     public EnterRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi, 
-        ChatHubWebApiConnection.ChatHub chatHub, ILogger<EnterRoomHandler> logger, 
-        IDispatcher dispatcher)
+        ChatHubWebApiConnection.ChatHub chatHub, IState<RoomsState> roomsState, 
+        ILogger<EnterRoomHandler> logger, IDispatcher dispatcher)
     {
         _swal = swal;
         _chatHubWebApi = chatHubWebApi;
         _chatHub = chatHub;
+        _roomsState = roomsState;
         _logger = logger;
         _dispatcher = dispatcher;
     }
 
     public async ValueTask<OneOf<Success, Error, AuthenticationFailure>> HandleAsync(EnterRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
+        //if (_roomsState.Value.LoggedRooms.Any(e => e.Id == request.Id))
+        //{
+        //    _ = _swal.FireTimedToastMessageAsync("Ya estás en esa habitación", "", SweetAlertIcon.Warning);
+
+        //    return new Error();
+        //}
+
         _ = _swal.FireBlockedMessageAsync("Conectado con el chat", "Espera un momento!");
         await _chatHub.StartIfNotConnectedAsync((userName, userId, roomId, message, dateTime) =>
         {

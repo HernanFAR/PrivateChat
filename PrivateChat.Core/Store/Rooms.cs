@@ -68,4 +68,3 @@ public static class RoomsReducers
         return new RoomsState(loggedRooms);
     }
 }
-
