@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using VSlices.Core.Abstracts.Presentation;
+using VSlices.Core.Presentation.AspNetCore;
 
 // ReSharper disable once CheckNamespace
 namespace Core.UseCases.ChatHubConnection;

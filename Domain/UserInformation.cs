@@ -1,6 +1,4 @@
-﻿using OneOf;
-using OneOf.Types;
-using VSlices.Core.Abstracts.Responses;
+﻿using VSlices.Core.Abstracts.Responses;
 
 namespace Domain;
 
@@ -21,7 +19,7 @@ public class UserInformation
         _rooms = new List<string>();
     }
 
-    public OneOf<Success, BusinessFailure> AddRoom(string roomId)
+    public Response<Success> AddRoom(string roomId)
     {
         if (_rooms.Count > 4)
         {
@@ -38,7 +36,7 @@ public class UserInformation
         return new Success();
     }
 
-    public OneOf<Success, BusinessFailure> RemoveRoom(string roomId)
+    public Response<Success> RemoveRoom(string roomId)
     {
         return _rooms.Remove(roomId)
             ? new Success()
