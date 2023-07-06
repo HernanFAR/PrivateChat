@@ -4,16 +4,16 @@ using Newtonsoft.Json;
 using PrivateChat.Core.Abstractions;
 
 // ReSharper disable once CheckNamespace
-namespace PrivateChat.CrossCutting.ChatWebApi;
+namespace ChatHubWebApi;
 
-public partial class ChatWebApiConnection
+public partial class ChatHubWebApiConnection
 {
     //public static readonly Uri ServiceUrl = new("https://privatechat-production.up.railway.app");
     public static readonly Uri ServiceUrl = new("https://localhost:7253");
-    private readonly ILogger<ChatWebApiConnection> _logger;
+    private readonly ILogger<ChatHubWebApiConnection> _logger;
 
-    public ChatWebApiConnection(HttpClient httpClient,
-        ILogger<ChatWebApiConnection> logger)
+    public ChatHubWebApiConnection(HttpClient httpClient,
+        ILogger<ChatHubWebApiConnection> logger)
     {
         BaseUrl = ServiceUrl.ToString();
 
@@ -30,17 +30,15 @@ public partial class ChatWebApiConnection
     public class ChatHub : IAsyncDisposable
     {
         private readonly ISessionStorage _sessionStorage;
-        private readonly IApplicationLoginProvider _loginProvider;
 
         private Action<string, string, string, string, DateTimeOffset>? _onReceivingMessageAction;
         private HubConnection? _connection;
         private IDisposable? _receiveSuscription;
         private bool _connected;
 
-        public ChatHub(ISessionStorage sessionStorage, IApplicationLoginProvider loginProvider)
+        public ChatHub(ISessionStorage sessionStorage)
         {
             _sessionStorage = sessionStorage;
-            _loginProvider = loginProvider;
         }
 
         private HubConnection BuildHubConnection()
@@ -48,7 +46,7 @@ public partial class ChatWebApiConnection
             return new HubConnectionBuilder()
                 .WithUrl(new Uri(ServiceUrl, "/websocket/chat"), options =>
                 {
-                    options.AccessTokenProvider = () => Task.FromResult<string?>(_sessionStorage.GetItem<string>(_loginProvider.JwtKey));
+                    options.AccessTokenProvider = () => Task.FromResult<string?>(_sessionStorage.GetItem<string>(LoginStateProvider.JwtKey));
                 })
                 .Build();
         }

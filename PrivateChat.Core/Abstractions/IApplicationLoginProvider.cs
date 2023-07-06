@@ -1,15 +1,13 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using PrivateChat.CrossCutting.ChatWebApi;
+using ChatHubWebApi;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace PrivateChat.Core.Abstractions;
 
 public interface IApplicationLoginProvider
 {
-    string JwtKey { get; }
-
     Task Login(string token, CancellationToken cancellationToken = default);
 
     Task Logout(CancellationToken cancellationToken = default);
@@ -20,7 +18,7 @@ public class LoginStateProvider : AuthenticationStateProvider, IApplicationLogin
     private readonly ISessionStorage _sessionStorage;
     private readonly HttpClient _httpClient;
     private readonly ChatHubWebApiConnection.ChatHub _chatHub;
-    private static readonly string JwtKey_ = "JWT";
+    public const string JwtKey = "JWT";
 
     public LoginStateProvider(ISessionStorage sessionStorage,
         HttpClient httpClient, ChatHubWebApiConnection.ChatHub chatHub)
@@ -48,8 +46,6 @@ public class LoginStateProvider : AuthenticationStateProvider, IApplicationLogin
 
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(tokenInfo.Claims, "Bearer Jwt")));
     }
-
-    public string JwtKey => JwtKey_;
 
     public async Task Login(string token, CancellationToken cancellationToken = default)
     {

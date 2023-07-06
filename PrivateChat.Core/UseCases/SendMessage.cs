@@ -1,4 +1,6 @@
-﻿using CurrieTechnologies.Razor.SweetAlert2;
+﻿using System.Security.Claims;
+using ChatHubWebApi;
+using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -7,8 +9,6 @@ using PrivateChat.Core.Abstractions;
 using PrivateChat.Core.Store.Messages;
 using PrivateChat.Core.Store.Rooms;
 using PrivateChat.Core.Structs;
-using System.Security.Claims;
-using PrivateChat.CrossCutting.ChatWebApi;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.SendMessage;
@@ -52,9 +52,9 @@ public class SendMessageHandler
 
             _dispatcher.Dispatch(new RoomIncomingMessageAction(request.RoomId));
             _dispatcher.Dispatch(new IncomingMessageAction(
-                state.User.Identity.Name,
-                state.User.GetNameIdentifier(),
-                request.RoomId,
+                state.User.Identity.Name, 
+                state.User.GetNameIdentifier(), 
+                request.RoomId, 
                 request.Message,
                 DateTimeOffset.Now));
 
