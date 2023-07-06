@@ -19,12 +19,12 @@ public class CreateUserCommand
 public class CreateUserHandler
 {
     private readonly SweetAlertService _swal;
-    private readonly ChatWebApiConnection _chatHubWebApi;
+    private readonly ChatHubWebApiConnection _chatHubWebApi;
     private readonly IApplicationLoginProvider _applicationLoginProvider;
     private readonly ILogger<CreateUserHandler> _logger;
     private int _retries;
 
-    public CreateUserHandler(SweetAlertService swal, ChatWebApiConnection chatHubWebApi,
+    public CreateUserHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
         IApplicationLoginProvider applicationLoginProvider, ILogger<CreateUserHandler> logger)
     {
         _swal = swal;

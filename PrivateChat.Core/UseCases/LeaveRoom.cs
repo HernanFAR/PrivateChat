@@ -1,11 +1,16 @@
-﻿using CurrieTechnologies.Razor.SweetAlert2;
+﻿using OneOf.Types;
+using OneOf;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ChatHubWebApi;
+using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.Extensions.Logging;
-using OneOf;
-using OneOf.Types;
-using PrivateChat.Core.Store.Rooms;
 using PrivateChat.Core.Structs;
-using PrivateChat.CrossCutting.ChatWebApi;
+using PrivateChat.Core.Store.Rooms;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.LeaveRoom;
@@ -15,12 +20,12 @@ public record LeaveRoomCommand(string Id);
 public class LeaveRoomHandler
 {
     private readonly SweetAlertService _swal;
-    private readonly ChatWebApiConnection _chatHubWebApi;
+    private readonly ChatHubWebApiConnection _chatHubWebApi;
     private readonly ILogger<LeaveRoomHandler> _logger;
     private readonly IDispatcher _dispatcher;
     private int _retries;
 
-    public LeaveRoomHandler(SweetAlertService swal, ChatWebApiConnection chatHubWebApi,
+    public LeaveRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
         ILogger<LeaveRoomHandler> logger, IDispatcher dispatcher)
     {
         _swal = swal;

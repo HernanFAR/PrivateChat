@@ -1,4 +1,5 @@
 using Blazored.SessionStorage;
+using ChatHubWebApi;
 using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -9,7 +10,6 @@ using PrivateChat.Core.UseCases.CreateUser;
 using PrivateChat.Core.UseCases.EnterRoom;
 using PrivateChat.Core.UseCases.LeaveRoom;
 using PrivateChat.Core.UseCases.SendMessage;
-using PrivateChat.CrossCutting.ChatWebApi;
 using PrivateChat.Views;
 using Radzen;
 
@@ -34,8 +34,8 @@ builder.Services
 #endif
     });
 
-builder.Services.AddScoped<ChatWebApiConnection>();
-builder.Services.AddScoped<ChatWebApiConnection.ChatHub>();
+builder.Services.AddScoped<ChatHubWebApiConnection>();
+builder.Services.AddScoped<ChatHubWebApiConnection.ChatHub>();
 builder.Services.AddScoped<LoginStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<LoginStateProvider>());
 builder.Services.AddScoped<IApplicationLoginProvider>(sp => sp.GetRequiredService<LoginStateProvider>());

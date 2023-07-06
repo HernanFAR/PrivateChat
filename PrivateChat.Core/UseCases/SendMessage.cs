@@ -18,13 +18,13 @@ public record SendMessageCommand(string RoomId, string Message);
 public class SendMessageHandler
 {
     private readonly SweetAlertService _swal;
-    private readonly ChatWebApiConnection _chatHubWebApi;
+    private readonly ChatHubWebApiConnection _chatHubWebApi;
     private readonly LoginStateProvider _loginStateProvider;
     private readonly ILogger<SendMessageHandler> _logger;
     private readonly IDispatcher _dispatcher;
     private int _retries;
 
-    public SendMessageHandler(SweetAlertService swal, ChatWebApiConnection chatHubWebApi,
+    public SendMessageHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
         LoginStateProvider loginStateProvider,
         ILogger<SendMessageHandler> logger, IDispatcher dispatcher)
     {
