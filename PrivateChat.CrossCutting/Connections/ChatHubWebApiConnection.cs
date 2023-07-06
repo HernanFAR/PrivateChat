@@ -4,16 +4,16 @@ using Newtonsoft.Json;
 using PrivateChat.Core.Abstractions;
 
 // ReSharper disable once CheckNamespace
-namespace ChatHubWebApi;
+namespace PrivateChat.CrossCutting.ChatWebApi;
 
-public partial class ChatHubWebApiConnection
+public partial class ChatWebApiConnection
 {
     //public static readonly Uri ServiceUrl = new("https://privatechat-production.up.railway.app");
     public static readonly Uri ServiceUrl = new("https://localhost:7253");
-    private readonly ILogger<ChatHubWebApiConnection> _logger;
+    private readonly ILogger<ChatWebApiConnection> _logger;
 
-    public ChatHubWebApiConnection(HttpClient httpClient,
-        ILogger<ChatHubWebApiConnection> logger)
+    public ChatWebApiConnection(HttpClient httpClient,
+        ILogger<ChatWebApiConnection> logger)
     {
         BaseUrl = ServiceUrl.ToString();
 
@@ -46,7 +46,7 @@ public partial class ChatHubWebApiConnection
             return new HubConnectionBuilder()
                 .WithUrl(new Uri(ServiceUrl, "/websocket/chat"), options =>
                 {
-                    options.AccessTokenProvider = () => Task.FromResult<string?>(_sessionStorage.GetItem<string>(LoginStateProvider.JwtKey));
+                    options.AccessTokenProvider = () => Task.FromResult<string?>(_sessionStorage.GetItem<string>(LoginStateProvider.JwtToken));
                 })
                 .Build();
         }

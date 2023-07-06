@@ -1,31 +1,35 @@
-﻿using OneOf.Types;
-using OneOf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ChatHubWebApi;
-using CurrieTechnologies.Razor.SweetAlert2;
+﻿using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PrivateChat.Core.Structs;
 using PrivateChat.Core.Store.Rooms;
+using PrivateChat.CrossCutting.ChatWebApi;
+using VSlices.Core.Abstracts.BusinessLogic;
+using VSlices.Core.Abstracts.Presentation;
+using VSlices.Core.Abstracts.Responses;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.LeaveRoom;
 
-public record LeaveRoomCommand(string Id);
+public class LeaveRoomDependencyDefinition : IUseCaseDependencyDefinition
+{
+    public static void DefineDependencies(IServiceCollection services)
+    {
+        services.AddScoped<LeaveRoomHandler>();
+    }
+}
 
-public class LeaveRoomHandler
+public record LeaveRoomCommand(string Id) : ICommand;
+
+public class LeaveRoomHandler : IHandler<LeaveRoomCommand>
 {
     private readonly SweetAlertService _swal;
-    private readonly ChatHubWebApiConnection _chatHubWebApi;
+    private readonly ChatWebApiConnection _chatHubWebApi;
     private readonly ILogger<LeaveRoomHandler> _logger;
     private readonly IDispatcher _dispatcher;
     private int _retries;
 
-    public LeaveRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
+    public LeaveRoomHandler(SweetAlertService swal, ChatWebApiConnection chatHubWebApi,
         ILogger<LeaveRoomHandler> logger, IDispatcher dispatcher)
     {
         _swal = swal;
@@ -34,7 +38,7 @@ public class LeaveRoomHandler
         _dispatcher = dispatcher;
     }
 
-    public async ValueTask<OneOf<Success, Error, AuthenticationFailure>> HandleAsync(LeaveRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public async ValueTask<Response<Success>> HandleAsync(LeaveRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         try
         {
@@ -50,25 +54,25 @@ public class LeaveRoomHandler
         catch (ApiException ex)
             when (ex.StatusCode == 401)
         {
-            return new AuthenticationFailure();
+            return BusinessFailure.Of.UserNotAuthenticated();
         }
         catch (ApiException ex)
             when (ex.StatusCode == 404)
         {
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
         catch (ApiException ex)
             when (ex.StatusCode == 429)
         {
             _ = _swal.FireAsync("Se han enviado muchas peticiones", "Intente más tarde", SweetAlertIcon.Error);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
-        catch (ApiException ex)
+        catch (ApiException)
         {
             _ = _swal.FireAsync("Se ha producido un error interno", "Intente más tarde", SweetAlertIcon.Error);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
     }
 

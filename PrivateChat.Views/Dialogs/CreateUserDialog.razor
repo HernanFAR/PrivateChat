@@ -30,7 +30,7 @@
 
         var result = await CreateUserHandler.HandleAsync(_createUserCommand, CancellationToken.None);
 
-        if (result.IsT0)
+        if (result.IsSuccess)
         {
             DialogService.Close();
         }

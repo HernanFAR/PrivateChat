@@ -1,30 +1,40 @@
-﻿using ChatHubWebApi;
-using CurrieTechnologies.Razor.SweetAlert2;
+﻿using CurrieTechnologies.Razor.SweetAlert2;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OneOf.Types;
-using OneOf;
 using PrivateChat.Core.Abstractions;
+using PrivateChat.CrossCutting.ChatWebApi;
+using VSlices.Core.Abstracts.BusinessLogic;
+using VSlices.Core.Abstracts.Presentation;
+using VSlices.Core.Abstracts.Responses;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.CreateUser;
 
-public class CreateUserCommand
+public class CreateUserDependencyDefinition : IUseCaseDependencyDefinition
+{
+    public static void DefineDependencies(IServiceCollection services)
+    {
+        services.AddScoped<CreateUserHandler>();
+    }
+}
+
+public class CreateUserCommand : ICommand
 {
     public string Name { get; set; } = string.Empty;
 
     public bool Relogin { get; set; }
-    
+
 }
 
-public class CreateUserHandler
+public class CreateUserHandler : IHandler<CreateUserCommand>
 {
     private readonly SweetAlertService _swal;
-    private readonly ChatHubWebApiConnection _chatHubWebApi;
+    private readonly ChatWebApiConnection _chatHubWebApi;
     private readonly IApplicationLoginProvider _applicationLoginProvider;
     private readonly ILogger<CreateUserHandler> _logger;
     private int _retries;
 
-    public CreateUserHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
+    public CreateUserHandler(SweetAlertService swal, ChatWebApiConnection chatHubWebApi,
         IApplicationLoginProvider applicationLoginProvider, ILogger<CreateUserHandler> logger)
     {
         _swal = swal;
@@ -33,7 +43,7 @@ public class CreateUserHandler
         _logger = logger;
     }
 
-    public async ValueTask<OneOf<Success, Error>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public async ValueTask<Response<Success>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         try
         {
@@ -55,20 +65,20 @@ public class CreateUserHandler
                 apiException.Result,
                 SweetAlertIcon.Warning);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
         catch (ApiException ex)
             when (ex.StatusCode == 429)
         {
             _ = _swal.FireAsync("Se han enviado muchas peticiones", "Intente más tarde", SweetAlertIcon.Error);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
-        catch (ApiException ex)
+        catch (ApiException)
         {
             _ = _swal.FireAsync("Se ha producido un error interno", "Intente más tarde", SweetAlertIcon.Error);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
     }
 

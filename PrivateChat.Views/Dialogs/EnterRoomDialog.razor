@@ -2,6 +2,7 @@
 @using PrivateChat.Core.UseCases.CreateUser
 @using Microsoft.Extensions.Logging
 @using CurrieTechnologies.Razor.SweetAlert2
+@using VSlices.Core.Abstracts.Responses
 
 @inject EnterRoomHandler EnterRoomHandler
 @inject CreateUserHandler CreateUserHandler
@@ -35,9 +36,9 @@
     {
         var result = await EnterRoomHandler.HandleAsync(_enterRoomCommand, CancellationToken.None);
 
-        if (result.IsT0) DialogService.Close();
+        if (result.IsSuccess) DialogService.Close();
 
-        if (result.IsT2)
+        if (result is { IsFailure: true, BusinessFailure.Kind: FailureKind.NotAuthenticatedUser })
         {
             if (AuthStateTask is null)
             {

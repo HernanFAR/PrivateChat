@@ -1,8 +1,8 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using PrivateChat.CrossCutting.ChatWebApi;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Security.Claims;
-using ChatHubWebApi;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace PrivateChat.Core.Abstractions;
 
@@ -17,11 +17,11 @@ public class LoginStateProvider : AuthenticationStateProvider, IApplicationLogin
 {
     private readonly ISessionStorage _sessionStorage;
     private readonly HttpClient _httpClient;
-    private readonly ChatHubWebApiConnection.ChatHub _chatHub;
-    public const string JwtKey = "JWT";
+    private readonly ChatWebApiConnection.ChatHub _chatHub;
+    public const string JwtToken = "JWT";
 
     public LoginStateProvider(ISessionStorage sessionStorage,
-        HttpClient httpClient, ChatHubWebApiConnection.ChatHub chatHub)
+        HttpClient httpClient, ChatWebApiConnection.ChatHub chatHub)
     {
         _sessionStorage = sessionStorage;
         _httpClient = httpClient;
@@ -32,7 +32,7 @@ public class LoginStateProvider : AuthenticationStateProvider, IApplicationLogin
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var jwt = await _sessionStorage.GetItemAsync<string?>(JwtKey);
+        var jwt = await _sessionStorage.GetItemAsync<string?>(JwtToken);
 
         return string.IsNullOrEmpty(jwt) ? AnonymousUser : BuildFromJwt(jwt);
     }
@@ -49,14 +49,14 @@ public class LoginStateProvider : AuthenticationStateProvider, IApplicationLogin
 
     public async Task Login(string token, CancellationToken cancellationToken = default)
     {
-        await _sessionStorage.SetItemAsync(JwtKey, token, cancellationToken);
+        await _sessionStorage.SetItemAsync(JwtToken, token, cancellationToken);
 
         NotifyAuthenticationStateChanged(Task.FromResult(BuildFromJwt(token)));
     }
 
     public async Task Logout(CancellationToken cancellationToken = default)
     {
-        await _sessionStorage.RemoveItemAsync(JwtKey, cancellationToken);
+        await _sessionStorage.RemoveItemAsync(JwtToken, cancellationToken);
         await _chatHub.DisposeIfConnectedAsync();
 
         NotifyAuthenticationStateChanged(Task.FromResult(AnonymousUser));

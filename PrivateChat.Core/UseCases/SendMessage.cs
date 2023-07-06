@@ -1,30 +1,39 @@
-﻿using System.Security.Claims;
-using ChatHubWebApi;
-using CurrieTechnologies.Razor.SweetAlert2;
+﻿using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OneOf;
-using OneOf.Types;
 using PrivateChat.Core.Abstractions;
 using PrivateChat.Core.Store.Messages;
 using PrivateChat.Core.Store.Rooms;
-using PrivateChat.Core.Structs;
+using PrivateChat.CrossCutting.ChatWebApi;
+using System.Security.Claims;
+using VSlices.Core.Abstracts.BusinessLogic;
+using VSlices.Core.Abstracts.Presentation;
+using VSlices.Core.Abstracts.Responses;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.SendMessage;
 
-public record SendMessageCommand(string RoomId, string Message);
+public class SendMessageDependencyDefinition : IUseCaseDependencyDefinition
+{
+    public static void DefineDependencies(IServiceCollection services)
+    {
+        services.AddScoped<SendMessageHandler>();
+    }
+}
 
-public class SendMessageHandler
+public record SendMessageCommand(string RoomId, string Message) : ICommand;
+
+public class SendMessageHandler : IHandler<SendMessageCommand>
 {
     private readonly SweetAlertService _swal;
-    private readonly ChatHubWebApiConnection _chatHubWebApi;
+    private readonly ChatWebApiConnection _chatHubWebApi;
     private readonly LoginStateProvider _loginStateProvider;
     private readonly ILogger<SendMessageHandler> _logger;
     private readonly IDispatcher _dispatcher;
     private int _retries;
 
-    public SendMessageHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi,
+    public SendMessageHandler(SweetAlertService swal, ChatWebApiConnection chatHubWebApi,
         LoginStateProvider loginStateProvider,
         ILogger<SendMessageHandler> logger, IDispatcher dispatcher)
     {
@@ -35,7 +44,7 @@ public class SendMessageHandler
         _dispatcher = dispatcher;
     }
 
-    public async ValueTask<OneOf<Success, Error, AuthenticationFailure>> HandleAsync(SendMessageCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public async ValueTask<Response<Success>> HandleAsync(SendMessageCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         try
         {
@@ -52,9 +61,9 @@ public class SendMessageHandler
 
             _dispatcher.Dispatch(new RoomIncomingMessageAction(request.RoomId));
             _dispatcher.Dispatch(new IncomingMessageAction(
-                state.User.Identity.Name, 
-                state.User.GetNameIdentifier(), 
-                request.RoomId, 
+                state.User.Identity.Name,
+                state.User.GetNameIdentifier(),
+                request.RoomId,
                 request.Message,
                 DateTimeOffset.Now));
 
@@ -65,7 +74,7 @@ public class SendMessageHandler
         catch (ApiException ex)
             when (ex.StatusCode == 401)
         {
-            return new AuthenticationFailure();
+            return BusinessFailure.Of.UserNotAuthenticated();
         }
         catch (ApiException ex)
             when (ex.StatusCode == 404)
@@ -75,7 +84,7 @@ public class SendMessageHandler
                 "No puedes enviar mensajes a esa sala",
                 SweetAlertIcon.Warning);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
         catch (ApiException<ICollection<string>> apiException)
         {
@@ -84,20 +93,20 @@ public class SendMessageHandler
                 apiException.Result,
                 SweetAlertIcon.Warning);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
         catch (ApiException ex)
             when (ex.StatusCode == 429)
         {
             _ = _swal.FireAsync("Se han enviado muchas peticiones", "Intente más tarde", SweetAlertIcon.Error);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
-        catch (ApiException ex)
+        catch (ApiException)
         {
             _ = _swal.FireAsync("Se ha producido un error interno", "Intente más tarde", SweetAlertIcon.Error);
 
-            return new Error();
+            return BusinessFailure.Of.DefaultError();
         }
     }
 
