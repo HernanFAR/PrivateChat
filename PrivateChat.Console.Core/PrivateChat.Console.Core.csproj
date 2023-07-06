@@ -17,7 +17,6 @@
 
   <ItemGroup>
 	  <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.8" />
-	  <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="7.0.8" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="7.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

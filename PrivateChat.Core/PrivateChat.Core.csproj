@@ -12,23 +12,12 @@
 	<PackageReference Include="Fluxor.Blazor.Web" Version="5.9.0" />
 	<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.8" />
 	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.8" />
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="7.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.18.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="OneOf" Version="3.0.243" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
+    <PackageReference Include="OneOf" Version="3.0.255" />
+    <PackageReference Include="VSlices.Core.Abstracts" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <OpenApiReference Include="OpenAPIs\swagger.json" CodeGenerator="NSwagCSharp" Namespace="ChatHubWebApi" ClassName="ChatHubWebApiConnection">
-      <SourceUri>https://privatechat-production.up.railway.app/swagger/v1/swagger.json</SourceUri>
-    </OpenApiReference>
+    <ProjectReference Include="..\PrivateChat.CrossCutting\PrivateChat.CrossCutting.csproj" />
   </ItemGroup>
 
 </Project>

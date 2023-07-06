@@ -1,9 +1,9 @@
-﻿using ChatHubWebApi;
-using CurrieTechnologies.Razor.SweetAlert2;
+﻿using CurrieTechnologies.Razor.SweetAlert2;
 using Microsoft.Extensions.Logging;
-using OneOf.Types;
 using OneOf;
+using OneOf.Types;
 using PrivateChat.Core.Abstractions;
+using PrivateChat.CrossCutting.ChatWebApi;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.CreateUser;
@@ -13,7 +13,7 @@ public class CreateUserCommand
     public string Name { get; set; } = string.Empty;
 
     public bool Relogin { get; set; }
-    
+
 }
 
 public class CreateUserHandler
