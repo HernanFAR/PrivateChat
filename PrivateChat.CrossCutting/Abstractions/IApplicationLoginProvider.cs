@@ -19,11 +19,11 @@ public class LoginStateProvider : AuthenticationStateProvider, IApplicationLogin
 {
     private readonly ISessionStorage _sessionStorage;
     private readonly HttpClient _httpClient;
-    private readonly ChatHubWebApiConnection.ChatHub _chatHub;
+    private readonly ChatWebApiConnection.ChatHub _chatHub;
     private static readonly string JwtKey_ = "JWT";
 
     public LoginStateProvider(ISessionStorage sessionStorage,
-        HttpClient httpClient, ChatHubWebApiConnection.ChatHub chatHub)
+        HttpClient httpClient, ChatWebApiConnection.ChatHub chatHub)
     {
         _sessionStorage = sessionStorage;
         _httpClient = httpClient;

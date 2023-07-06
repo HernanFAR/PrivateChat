@@ -1,17 +1,12 @@
-﻿using OneOf.Types;
-using OneOf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ChatHubWebApi;
-using CurrieTechnologies.Razor.SweetAlert2;
+﻿using CurrieTechnologies.Razor.SweetAlert2;
 using Fluxor;
 using Microsoft.Extensions.Logging;
+using OneOf;
+using OneOf.Types;
 using PrivateChat.Core.Store.Messages;
 using PrivateChat.Core.Store.Rooms;
 using PrivateChat.Core.Structs;
+using PrivateChat.CrossCutting.ChatWebApi;
 
 // ReSharper disable once CheckNamespace
 namespace PrivateChat.Core.UseCases.EnterRoom;
@@ -24,15 +19,15 @@ public class EnterRoomCommand
 public class EnterRoomHandler
 {
     private readonly SweetAlertService _swal;
-    private readonly ChatHubWebApiConnection _chatHubWebApi;
-    private readonly ChatHubWebApiConnection.ChatHub _chatHub;
+    private readonly ChatWebApiConnection _chatHubWebApi;
+    private readonly ChatWebApiConnection.ChatHub _chatHub;
     private readonly IState<RoomsState> _roomsState;
     private readonly ILogger<EnterRoomHandler> _logger;
     private readonly IDispatcher _dispatcher;
     private int _retries;
 
-    public EnterRoomHandler(SweetAlertService swal, ChatHubWebApiConnection chatHubWebApi, 
-        ChatHubWebApiConnection.ChatHub chatHub, IState<RoomsState> roomsState, 
+    public EnterRoomHandler(SweetAlertService swal, ChatWebApiConnection chatHubWebApi,
+        ChatWebApiConnection.ChatHub chatHub, IState<RoomsState> roomsState,
         ILogger<EnterRoomHandler> logger, IDispatcher dispatcher)
     {
         _swal = swal;
