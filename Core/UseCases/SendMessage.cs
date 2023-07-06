@@ -1,19 +1,15 @@
-﻿using System.Net.Security;
-using CrossCutting;
+﻿using CrossCutting;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using OneOf;
-using OneOf.Types;
 using VSlices.Core.Abstracts.BusinessLogic;
-using VSlices.Core.Abstracts.Presentation;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
+using VSlices.Core.Presentation.AspNetCore;
 
 // ReSharper disable once CheckNamespace
 namespace Core.UseCases.SendMessage;
@@ -100,23 +96,20 @@ public class SendMessageHandler : IHandler<SendMessageCommand, Success>
         _userManager = userManager;
     }
 
-    public async ValueTask<OneOf<Success, BusinessFailure>> HandleAsync(SendMessageCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public async ValueTask<Response<Success>> HandleAsync(SendMessageCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         var userInfo = _userManager.GetUser(request.NameIdentifier);
 
         var isInRoom = userInfo.Rooms.Contains(request.RoomId);
 
-        if (!isInRoom)
-        {
-            return BusinessFailure.Of.NotFoundResource();
-        }
+        if (!isInRoom) return BusinessFailure.Of.NotFoundResource();
 
         await _chatHub.Clients
             .GroupExcept(request.RoomId, userInfo.ConnectionId)
             .ReceiveMessage(
-                request.Name, 
-                request.NameIdentifier, 
-                request.RoomId, 
+                request.Name,
+                request.NameIdentifier,
+                request.RoomId,
                 request.Message,
                 DateTimeOffset.Now);
 

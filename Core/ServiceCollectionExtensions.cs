@@ -50,7 +50,7 @@ public static class ServiceCollectionExtensions
             });
 
         services.AddSender<ReflectionSender>();
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(FluentValidationBehavior<,>));
+        services.AddPipelineBehavior(typeof(FluentValidationBehavior<,>));
 
         return services;
     }

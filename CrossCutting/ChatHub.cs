@@ -29,7 +29,7 @@ public class ChatHub : Hub<IChatHub>
 
         var userAdded = userManager.RegisterUserWithContext(Context.GetNameIdentifier(), Context);
 
-        if (userAdded.IsT1)
+        if (userAdded.IsFailure)
         {
             Context.Abort();
         }

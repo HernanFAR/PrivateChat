@@ -1,11 +1,8 @@
 ﻿using Domain;
-using OneOf;
-using OneOf.Types;
-using System.Collections.Concurrent;
-using Microsoft.AspNetCore.SignalR;
-using VSlices.Core.Abstracts.Responses;
 using Microsoft.AspNetCore.Connections.Features;
-using System;
+using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
+using VSlices.Core.Abstracts.Responses;
 
 namespace CrossCutting;
 
@@ -27,7 +24,7 @@ public class UserManager
         }
     }
 
-    public OneOf<Success, BusinessFailure> RegisterUserWithContext(string userId, HubCallerContext context)
+    public Response<Success> RegisterUserWithContext(string userId, HubCallerContext context)
     {
         var heartbeatFeature = context.Features.Get<IConnectionHeartbeatFeature>();
 
@@ -50,7 +47,7 @@ public class UserManager
 
         return _userInfos.TryAdd(userId, new UserInformation(userId, context.ConnectionId))
             ? new Success()
-            : BusinessFailure.Of.NotAllowedUser();
+            : BusinessFailure.Of.UserNotAllowed();
     }
 
     public void RemoveUser(string userId)

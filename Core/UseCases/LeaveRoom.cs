@@ -6,12 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using OneOf;
-using OneOf.Types;
 using VSlices.Core.Abstracts.BusinessLogic;
-using VSlices.Core.Abstracts.Presentation;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
+using VSlices.Core.Presentation.AspNetCore;
 
 // ReSharper disable once CheckNamespace
 namespace Core.UseCases.LeaveRoom;
@@ -89,16 +87,13 @@ public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
         _userManager = userManager;
     }
 
-    public async ValueTask<OneOf<Success, BusinessFailure>> HandleAsync(LeaveRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public async ValueTask<Response<Success>> HandleAsync(LeaveRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         var userInfo = _userManager.GetUser(request.NameIdentifier);
 
         var result = userInfo.RemoveRoom(request.RoomId);
 
-        if (result.IsT1)
-        {
-            return result.AsT1;
-        }
+        if (result.IsFailure) return result.BusinessFailure;
 
         await _chatHub.Groups
             .RemoveFromGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
