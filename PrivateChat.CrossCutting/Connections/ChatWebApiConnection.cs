@@ -10,6 +10,7 @@ public partial class ChatWebApiConnection
 {
     //public static readonly Uri ServiceUrl = new("https://privatechat-production.up.railway.app");
     public static readonly Uri ServiceUrl = new("https://localhost:7253");
+    
     private readonly ILogger<ChatWebApiConnection> _logger;
 
     public ChatWebApiConnection(HttpClient httpClient,

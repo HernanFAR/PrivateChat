@@ -1,14 +1,11 @@
 ﻿@using PrivateChat.Core.UseCases.EnterRoom
 @using PrivateChat.Core.UseCases.CreateUser
 @using Microsoft.Extensions.Logging
-@using CurrieTechnologies.Razor.SweetAlert2
 @using VSlices.Core.Abstracts.Responses
+@using VSlices.Core.Abstracts.Sender
 
-@inject EnterRoomHandler EnterRoomHandler
-@inject CreateUserHandler CreateUserHandler
+@inject ISender Sender
 @inject DialogService DialogService
-@inject SweetAlertService Swal
-@inject IState<RoomsState> RoomsState
 @inject ILogger<EnterRoomDialog> Logger
 
 <EditForm Model="_enterRoomCommand" OnValidSubmit="SubmitForm">
@@ -34,7 +31,7 @@
 
     private async Task SubmitForm()
     {
-        var result = await EnterRoomHandler.HandleAsync(_enterRoomCommand, CancellationToken.None);
+        var result = await Sender.SendAsync(_enterRoomCommand, CancellationToken.None);
 
         if (result.IsSuccess) DialogService.Close();
 
@@ -53,7 +50,7 @@
                 Relogin = true
             };
 
-            await CreateUserHandler.HandleAsync(createUserCommand, CancellationToken.None);
+            await Sender.SendAsync(createUserCommand, CancellationToken.None);
         }
     }
 

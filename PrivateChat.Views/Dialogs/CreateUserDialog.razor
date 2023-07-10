@@ -1,6 +1,7 @@
 ﻿@using PrivateChat.Core.UseCases.CreateUser
+@using VSlices.Core.Abstracts.Sender
 
-@inject CreateUserHandler CreateUserHandler
+@inject ISender Sender
 @inject DialogService DialogService
 
 <EditForm Model="_createUserCommand" OnValidSubmit="SubmitForm">
@@ -28,7 +29,7 @@
     {
         _createUserCommand.Relogin = false;
 
-        var result = await CreateUserHandler.HandleAsync(_createUserCommand, CancellationToken.None);
+        var result = await Sender.SendAsync(_createUserCommand, CancellationToken.None);
 
         if (result.IsSuccess)
         {
