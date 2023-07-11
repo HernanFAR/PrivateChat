@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="VSlices.Core.BusinessLogic.FluentValidation" Version="4.0.0" />
-    <PackageReference Include="VSlices.Core.Presentation.AspNetCore" Version="4.0.0" />
-    <PackageReference Include="VSlices.Core.Sender.Reflection" Version="4.0.0" />
+    <PackageReference Include="VSlices.Core.BusinessLogic.FluentValidation" Version="4.4.0" />
+    <PackageReference Include="VSlices.Core.Presentation.AspNetCore" Version="4.4.0" />
+    <PackageReference Include="VSlices.Core.Sender.Reflection" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>
