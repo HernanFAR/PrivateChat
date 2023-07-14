@@ -26,7 +26,7 @@ public class EnterRoomTests : IClassFixture<TestFixture>
         var url = EnterRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, userId) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -41,7 +41,7 @@ public class EnterRoomTests : IClassFixture<TestFixture>
 
         var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
 
-        userManager.GetRoomsOfUser(userId).Should().Contain(roomName);
+        userManager.GetRoomsOfUser(userId).SuccessValue.Should().Contain(roomName);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class EnterRoomTests : IClassFixture<TestFixture>
         var url = EnterRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -88,7 +88,7 @@ public class EnterRoomTests : IClassFixture<TestFixture>
         var room6Url = EnterRoomEndpoint.Url
             .Replace("{room}", roomName6);
 
-        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -117,7 +117,7 @@ public class EnterRoomTests : IClassFixture<TestFixture>
 
         var errors = await response6.Content.ReadFromJsonAsync<string[]>();
 
-        errors.Should().Contain(UserInformation.CantAddMoreRooms);
+        errors.Should().Contain(UserInfo.CantAddMoreRooms);
     }
 
     [Fact]
@@ -134,8 +134,8 @@ public class EnterRoomTests : IClassFixture<TestFixture>
 
         const string userName = "Fabian";
 
-        var (jwtHernan, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
-        var (jwtFabian, userIdFabian) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Fabian");
+        var (jwtHernan, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwtFabian, userIdFabian) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Fabian");
 
         var httpClientHernan = _fixture.PrivateChatWebApi.CreateClient();
         httpClientHernan.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwtHernan}");
@@ -157,8 +157,8 @@ public class EnterRoomTests : IClassFixture<TestFixture>
 
         hubHernan.On<string, string, string, string, DateTimeOffset>("ReceiveMessage", (fromUser, fromUserId, roomId, message, datetime) =>
         {
-            fromUser.Should().Be(EnterRoomHandler.SystemName);
-            fromUserId.Should().Be(Guid.Empty.ToString());
+            fromUser.Should().Be(UserInfo.System.Name);
+            fromUserId.Should().Be(UserInfo.System.Id);
             roomId.Should().Be(roomName1);
             message.Should().Be(string.Format(EnterRoomHandler.SystemWelcomeMessage, userName, userIdFabian));
             datetime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));

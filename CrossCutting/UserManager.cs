@@ -8,74 +8,52 @@ namespace CrossCutting;
 
 public class UserManager
 {
-    public string Id { get; } = Guid.NewGuid().ToString();
+    private readonly ConcurrentDictionary<string, UserInfo> _userInfos = new();
+    
+    public UserInfo[] Users => _userInfos.Values.ToArray();
 
-    private readonly HashSet<string> ConnectionsToDisconnect = new();
-    private readonly object ConnectionsToDisconnectLock = new();
-    private readonly ConcurrentDictionary<string, UserInformation> _userInfos = new();
-
-    public void DisconnectClient(string connectionId)
+    public Response<Success> RegisterUser(string userId, string name, DateTimeOffset created)
     {
-        lock (ConnectionsToDisconnectLock)
-        {
-            if (ConnectionsToDisconnect.Contains(connectionId)) return;
-
-            ConnectionsToDisconnect.Add(connectionId);
-        }
-    }
-
-    public Response<Success> RegisterUserWithContext(string userId, HubCallerContext context)
-    {
-        var heartbeatFeature = context.Features.Get<IConnectionHeartbeatFeature>();
-
-        if (heartbeatFeature is null)
-        {
-            throw new InvalidOperationException(nameof(heartbeatFeature));
-        }
-
-        heartbeatFeature.OnHeartbeat(state =>
-        {
-            lock (ConnectionsToDisconnectLock)
-            {
-                if (!ConnectionsToDisconnect.Contains(context.ConnectionId)) return;
-
-                context.Abort();
-                ConnectionsToDisconnect.Remove(context.ConnectionId);
-            }
-
-        }, context.ConnectionId);
-
-        return _userInfos.TryAdd(userId, new UserInformation(userId, context.ConnectionId))
+        return _userInfos.TryAdd(userId, new UserInfo(userId, name, created))
             ? new Success()
             : BusinessFailure.Of.UserNotAllowed();
     }
 
-    public void RemoveUser(string userId)
+    public Response<Success> Remove(string userId)
     {
-        _userInfos.TryRemove(userId, out _);
+        var removed = _userInfos.TryRemove(userId, out _);
+
+        return removed
+            ? new Success()
+            : BusinessFailure.Of.NotFoundResource();
     }
 
-    public string[] GetRoomsOfUser(string userId)
+    public Response<string[]> GetRoomsOfUser(string userId)
     {
         _userInfos.TryGetValue(userId, out var userInfo);
 
-        if (userInfo is null)
-        {
-            throw new InvalidOperationException(nameof(userInfo));
-        }
-
-        return userInfo.Rooms.ToArray();
+        return userInfo is null 
+            ? BusinessFailure.Of.NotFoundResource() 
+            : userInfo.Rooms.ToArray();
     }
 
-    public UserInformation? GetUserOrDefault(string userId)
+    public Response<UserInfo> Get(string userId)
     {
         _userInfos.TryGetValue(userId, out var userInfo);
 
-        return userInfo;
+        return userInfo is null
+            ? BusinessFailure.Of.NotFoundResource()
+            : userInfo;
     }
 
-    public UserInformation GetUser(string userId)
+    public Response<Success> UpdateConnectionIdOfUser(string getNameIdentifier, HubCallerContext context)
     {
-        return GetUserOrDefault(userId) ?? throw new InvalidOperationException(nameof(userId));
+        var response = Get(getNameIdentifier);
+
+        if (response.IsFailure) return BusinessFailure.Of.NotFoundResource();
+
+        response.SuccessValue.UpdateConnectionId(context.ConnectionId);
+
+        return new Success();
     }
 }

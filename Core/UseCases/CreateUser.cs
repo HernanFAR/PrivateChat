@@ -8,8 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.InteropServices.JavaScript;
 using System.Security.Claims;
 using System.Text;
+using CrossCutting;
+using Domain;
 using VSlices.Core.Abstracts.BusinessLogic;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
@@ -70,13 +73,16 @@ public class CreateUserValidator : AbstractValidator<CreateUserCommand>
 public class CreateUserHandler : IHandler<CreateUserCommand, CreateUserCommandResponse>
 {
     private readonly IOptionsMonitor<JwtConfiguration> _jwtConfigMonitor;
+    private readonly UserManager _userManager;
 
-    public CreateUserHandler(IOptionsMonitor<JwtConfiguration> jwtConfigMonitor)
+    public CreateUserHandler(IOptionsMonitor<JwtConfiguration> jwtConfigMonitor, 
+        UserManager userManager)
     {
         _jwtConfigMonitor = jwtConfigMonitor;
+        _userManager = userManager;
     }
 
-    public ValueTask<Response<CreateUserCommandResponse>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
+    public async ValueTask<Response<CreateUserCommandResponse>> HandleAsync(CreateUserCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfigMonitor.CurrentValue.IssuerSigningKey));
         var claims = new Claim[]
@@ -95,6 +101,6 @@ public class CreateUserHandler : IHandler<CreateUserCommand, CreateUserCommandRe
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
         );
 
-        return ValueTask.FromResult<Response<CreateUserCommandResponse>>(new CreateUserCommandResponse(tokenHandler.WriteToken(jwt)));
+        return new CreateUserCommandResponse(tokenHandler.WriteToken(jwt));
     }
 }

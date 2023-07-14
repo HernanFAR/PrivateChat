@@ -26,7 +26,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
 
         var contract = new SendMessageContract("Testing");
 
-        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -49,7 +49,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
 
         var contract = new SendMessageContract("");
 
-        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -72,7 +72,7 @@ public class SendMessageTests : IClassFixture<TestFixture>
 
         var contract = new SendMessageContract("Testing");
 
-        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -101,8 +101,8 @@ public class SendMessageTests : IClassFixture<TestFixture>
 
         var contract = new SendMessageContract("Testing");
 
-        var (jwtHernan, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
-        var (jwtFabian, userIdFabian) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Fabian");
+        var (jwtHernan, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwtFabian, userIdFabian) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Fabian");
 
         var httpClientHernan = _fixture.PrivateChatWebApi.CreateClient();
         httpClientHernan.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwtHernan}");
