@@ -2,21 +2,39 @@
 
 namespace Domain;
 
-public class UserInformation
+public class UserInfo
 {
+    public class System
+    {
+        public static readonly string Id = Guid.Empty.ToString().Replace("-", "");
+        public const string Name = "System";
+    }
+
     public const string CantAddMoreRooms = "No puedes entrar a más de 5 habitaciones a la vez";
 
     public string Id { get; }
-    public string ConnectionId { get; }
+
+    public string Name { get; }
+
+    public string? ConnectionId { get; private set; }
+
+    public DateTimeOffset LastInteraction { get; private set; }
+
     public IReadOnlyList<string> Rooms => _rooms;
     private readonly List<string> _rooms;
 
-    public UserInformation(string id, string connectionId)
+    public UserInfo(string id, string name, DateTimeOffset lastInteraction)
     {
         Id = id;
-        ConnectionId = connectionId;
+        Name = name;
+        LastInteraction = lastInteraction;
 
         _rooms = new List<string>();
+    }
+
+    public void UpdateConnectionId(string connectionId)
+    {
+        ConnectionId = connectionId;
     }
 
     public Response<Success> AddRoom(string roomId)
@@ -41,5 +59,10 @@ public class UserInformation
         return _rooms.Remove(roomId)
             ? new Success()
             : BusinessFailure.Of.NotFoundResource();
+    }
+
+    public void UpdateLastActionTime()
+    {
+        LastInteraction = DateTimeOffset.UtcNow;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CrossCutting;
+using Domain;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 using VSlices.Core.Abstracts.BusinessLogic;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
@@ -63,22 +65,22 @@ public class LeaveRoomValidator : AbstractValidator<LeaveRoomCommand>
         _userManager = userManager;
 
         RuleFor(e => e.NameIdentifier)
-            .Must(BeRegisterInUserManager).WithMessage(UserNotRegisteredInUserManager);
+            .Must(HaveConnectionId).WithMessage(UserNotRegisteredInUserManager);
     }
 
-    private bool BeRegisterInUserManager(string userId)
+    private bool HaveConnectionId(string userId)
     {
-        return _userManager.GetUserOrDefault(userId) is not null;
+        return _userManager.Users
+            .Where(e => e.Id == userId)
+            .Any(e => e.ConnectionId is not null);
     }
 }
 
-// TODO: Agregar IHandler<T> where T : IRequest<Success>
-public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
+public class LeaveRoomHandler : IHandler<LeaveRoomCommand>
 {
     private readonly IHubContext<ChatHub, IChatHub> _chatHub;
     private readonly UserManager _userManager;
 
-    public const string SystemName = "System";
     public const string SystemWelcomeMessage = "Se ha desconectado: {0}#{1}.";
 
     public LeaveRoomHandler(IHubContext<ChatHub, IChatHub> chatHub, UserManager userManager)
@@ -89,11 +91,14 @@ public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
 
     public async ValueTask<Response<Success>> HandleAsync(LeaveRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
-        var userInfo = _userManager.GetUser(request.NameIdentifier);
+        var getUserResponse = _userManager.Get(request.NameIdentifier);
+        var userInfo = getUserResponse.SuccessValue;
 
-        var result = userInfo.RemoveRoom(request.RoomId);
+        if (userInfo.ConnectionId is null) throw new UnreachableException($"The user {userInfo.Id} does not have a connection id");
 
-        if (result.IsFailure) return result.BusinessFailure;
+        var removeRoomResponse = userInfo.RemoveRoom(request.RoomId);
+
+        if (removeRoomResponse.IsFailure) return removeRoomResponse.BusinessFailure;
 
         await _chatHub.Groups
             .RemoveFromGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
@@ -101,8 +106,8 @@ public class LeaveRoomHandler : IHandler<LeaveRoomCommand, Success>
         await _chatHub.Clients
             .Group(request.RoomId)
             .ReceiveMessage(
-                SystemName,
-                Guid.Empty.ToString(),
+                UserInfo.System.Name,
+                UserInfo.System.Id,
                 request.RoomId,
                 string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier),
                 DateTimeOffset.Now);

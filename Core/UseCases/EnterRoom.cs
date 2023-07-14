@@ -1,9 +1,12 @@
-﻿using CrossCutting;
+﻿using System.Diagnostics;
+using CrossCutting;
+using Domain;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using VSlices.Core.Abstracts.BusinessLogic;
@@ -50,7 +53,7 @@ public class EnterRoomEndpoint : IEndpointDefinition
     }
 }
 
-public record EnterRoomCommand(string RoomId, string NameIdentifier, string Name) : ICommand;
+public record EnterRoomCommand(string RoomId, string UserId, string Name) : ICommand;
 
 public class EnterRoomValidator : AbstractValidator<EnterRoomCommand>
 {
@@ -62,23 +65,23 @@ public class EnterRoomValidator : AbstractValidator<EnterRoomCommand>
     {
         _userManager = userManager;
 
-        RuleFor(e => e.NameIdentifier)
-            .Must(BeRegisterInUserManager).WithMessage(UserNotRegisteredInUserManager);
+        RuleFor(e => e.UserId)
+            .Must(HaveConnectionId).WithMessage(UserNotRegisteredInUserManager);
     }
 
-    private bool BeRegisterInUserManager(string userId)
+    private bool HaveConnectionId(string userId)
     {
-        return _userManager.GetUserOrDefault(userId) is not null;
+        return _userManager.Users
+            .Where(e => e.Id == userId)
+            .Any(e => e.ConnectionId is not null);
     }
 }
 
-// TODO: Agregar IHandler<T> where T : IRequest<Success>
-public class EnterRoomHandler : IHandler<EnterRoomCommand, Success>
+public class EnterRoomHandler : IHandler<EnterRoomCommand>
 {
     private readonly IHubContext<ChatHub, IChatHub> _chatHub;
     private readonly UserManager _userManager;
-
-    public const string SystemName = "System";
+    
     public const string SystemWelcomeMessage = "Se ha conectado: {0}#{1} ¡Bienvenido!";
 
     public EnterRoomHandler(IHubContext<ChatHub, IChatHub> chatHub, UserManager userManager)
@@ -89,22 +92,25 @@ public class EnterRoomHandler : IHandler<EnterRoomCommand, Success>
 
     public async ValueTask<Response<Success>> HandleAsync(EnterRoomCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
-        var userInfo = _userManager.GetUser(request.NameIdentifier);
+        var getUserResponse = _userManager.Get(request.UserId);
+        var user = getUserResponse.SuccessValue;
 
-        var result = userInfo.AddRoom(request.RoomId);
+        var result = user.AddRoom(request.RoomId);
 
         if (result.IsFailure) return result.BusinessFailure;
         
         await _chatHub.Clients
             .Group(request.RoomId)
             .ReceiveMessage(
-                SystemName,
-                Guid.Empty.ToString(),
+                UserInfo.System.Name,
+                UserInfo.System.Id,
                 request.RoomId,
-                string.Format(SystemWelcomeMessage, request.Name, request.NameIdentifier),
+                string.Format(SystemWelcomeMessage, request.Name, request.UserId),
                 DateTimeOffset.Now);
 
-        await _chatHub.Groups.AddToGroupAsync(userInfo.ConnectionId, request.RoomId, cancellationToken);
+        if (user.ConnectionId is null) throw new UnreachableException($"The user {request.UserId} does not have a connection id");
+
+        await _chatHub.Groups.AddToGroupAsync(user.ConnectionId, request.RoomId, cancellationToken);
 
         return new Success();
     }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using System.Threading.RateLimiting;
 using CrossCutting;
+using Core.UseCases.ClientDisconnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +85,7 @@ builder.Services.AddEndpointDefinition<CreateUserEndpoint>();
 builder.Services.AddEndpointDefinition<EnterRoomEndpoint>();
 builder.Services.AddEndpointDefinition<LeaveRoomEndpoint>();
 builder.Services.AddEndpointDefinition<SendMessageEndpoint>();
+ClientDisconnectedBackgroundService.DefineDependencies(builder.Services);
 
 var app = builder.Build();
 
