@@ -12,14 +12,7 @@ public static class HttpContextExtensions
             throw new InvalidOperationException(nameof(@this));
         }
 
-        if (@this.User.Identity is not ClaimsIdentity identity)
-        {
-            throw new InvalidOperationException(nameof(identity));
-        }
-
-        var nameClaim = identity.FindFirst(claimName);
-
-        return nameClaim?.Value;
+        return @this.User.TryGetClaim(claimName);
     }
 
     public static string? TryGetName(this HttpContext? @this)

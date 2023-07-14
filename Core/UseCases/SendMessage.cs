@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 using VSlices.Core.Abstracts.BusinessLogic;
 using VSlices.Core.Abstracts.Responses;
 using VSlices.Core.Abstracts.Sender;
@@ -76,12 +77,14 @@ public class SendMessageValidator : AbstractValidator<SendMessageCommand>
             .NotEmpty().WithMessage(MessageNotEmptyMessage);
 
         RuleFor(e => e.NameIdentifier)
-            .Must(BeRegisterInUserManager).WithMessage(UserNotRegisteredInUserManager);
+            .Must(HaveConnectionId).WithMessage(UserNotRegisteredInUserManager);
     }
 
-    private bool BeRegisterInUserManager(string userId)
+    private bool HaveConnectionId(string userId)
     {
-        return _userManager.GetUserOrDefault(userId) is not null;
+        return _userManager.Users
+            .Where(e => e.Id == userId)
+            .Any(e => e.ConnectionId is not null);
     }
 }
 
@@ -98,10 +101,14 @@ public class SendMessageHandler : IHandler<SendMessageCommand, Success>
 
     public async ValueTask<Response<Success>> HandleAsync(SendMessageCommand request, CancellationToken cancellationToken = new CancellationToken())
     {
-        var userInfo = _userManager.GetUser(request.NameIdentifier);
+        var getResponse = _userManager.Get(request.NameIdentifier);
+        var userInfo = getResponse.SuccessValue;
+
+        if (userInfo.ConnectionId is null) throw new UnreachableException($"The user {userInfo.Id} does not have a connection id");
 
         var isInRoom = userInfo.Rooms.Contains(request.RoomId);
 
+        if (userInfo.ConnectionId is null) throw new UnreachableException($"The user {userInfo.Id} does not have a connection id");
         if (!isInRoom) return BusinessFailure.Of.NotFoundResource();
 
         await _chatHub.Clients

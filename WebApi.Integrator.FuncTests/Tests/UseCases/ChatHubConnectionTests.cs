@@ -5,6 +5,9 @@ using System.Net.Mime;
 using Core.UseCases.EnterRoom;
 using CrossCutting;
 using Microsoft.Extensions.DependencyInjection;
+using Core.UseCases.CreateUser;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Json;
 
 namespace WebApi.Integrator.FuncTests.Tests.UseCases;
 
@@ -20,7 +23,7 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
     [Fact]
     public async Task ConnectToHub_ShouldConnectCorrectly()
     {
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, userId) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         await using var hub = _fixture.PrivateChatWebApi.CreateChatHubConnection(jwt);
 
@@ -28,43 +31,35 @@ public class ChatHubConnectionTests : IClassFixture<TestFixture>
 
         var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
 
-        userManager.GetUserOrDefault(userId).Should().NotBeNull();
+        userManager.Get(userId).SuccessValue.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task ConnectToHub_ShouldDisconnect_Detail_InvalidToken()
+    public async Task ConnectToHub_ShouldConnectCorrectly_DetailAfterDisconnection()
     {
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán", TimeSpan.FromSeconds(3));
+        var (jwt, userId) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
 
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
 
+        var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
+
         await using (var hub = _fixture.PrivateChatWebApi.CreateChatHubConnection(jwt))
         {
             await hub.StartAsync();
 
-            await Task.Delay(8500);
-
-            hub.Closed += exception =>
-            {
-                exception.Should().BeNull();
-
-                return Task.CompletedTask;
-            };
-
-            var url = EnterRoomEndpoint.Url
-                .Replace("{room}", "new_room");
-
-            var response = await httpClient.PostAsync(url, new StringContent("", MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json)));
-
-            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-
-            await Task.Delay(2500);
+            userManager.Get(userId).SuccessValue.Should().NotBeNull();
         }
 
-        var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
+        await Task.Delay(6000);
+        userManager.Get(userId).IsFailure.Should().BeTrue();
 
-        userManager.GetUserOrDefault(userId).Should().BeNull();
+        await using (var hub = _fixture.PrivateChatWebApi.CreateChatHubConnection(jwt))
+        {
+            await hub.StartAsync();
+
+            userManager.Get(userId).SuccessValue.Should().NotBeNull();
+        }
     }
 }

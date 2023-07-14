@@ -7,6 +7,7 @@ using System;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Domain;
 
 namespace WebApi.Integrator.FuncTests.Tests.UseCases;
 
@@ -26,7 +27,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var roomUrl = LeaveRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, userId) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, userId) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -43,7 +44,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
 
         var userManager = _fixture.PrivateChatWebApi.Services.GetRequiredService<UserManager>();
 
-        userManager.GetRoomsOfUser(userId).Should().BeEmpty();
+        userManager.GetRoomsOfUser(userId).SuccessValue.Should().BeEmpty();
     }
 
     [Fact]
@@ -53,7 +54,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var roomUrl = LeaveRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -74,7 +75,7 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
         var roomUrl = LeaveRoomEndpoint.Url
             .Replace("{room}", roomName);
 
-        var (jwt, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwt, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
 
         var httpClient = _fixture.PrivateChatWebApi.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwt}");
@@ -101,8 +102,8 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
 
         const string userName = "Fabian";
 
-        var (jwtHernan, _) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
-        var (jwtFabian, userIdFabian) = _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Fabian");
+        var (jwtHernan, _) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Hernán");
+        var (jwtFabian, userIdFabian) = await _fixture.PrivateChatWebApi.GenerateJwtTokenForName("Fabian");
 
         var httpClientHernan = _fixture.PrivateChatWebApi.CreateClient();
         httpClientHernan.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {jwtHernan}");
@@ -127,8 +128,8 @@ public class LeaveRoomTests : IClassFixture<TestFixture>
 
         hubHernan.On<string, string, string, string, DateTimeOffset>("ReceiveMessage", (fromUser, fromUserId, roomId, message, datetime) =>
         {
-            fromUser.Should().Be(LeaveRoomHandler.SystemName);
-            fromUserId.Should().Be(Guid.Empty.ToString());
+            fromUser.Should().Be(UserInfo.System.Name);
+            fromUserId.Should().Be(UserInfo.System.Id);
             roomId.Should().Be(roomName1);
             message.Should().Be(string.Format(LeaveRoomHandler.SystemWelcomeMessage, userName, userIdFabian));
             datetime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));

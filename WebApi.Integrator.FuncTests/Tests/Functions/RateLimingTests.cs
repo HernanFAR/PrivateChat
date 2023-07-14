@@ -5,11 +5,11 @@ using System.Net.Http.Json;
 
 namespace WebApi.Integrator.FuncTests.Tests.Functions;
 
-public class CreateUserTests : IClassFixture<TestFixture>
+public class RateLimingTests : IClassFixture<TestFixture>
 {
     private readonly TestFixture _fixture;
 
-    public CreateUserTests(TestFixture fixture)
+    public RateLimingTests(TestFixture fixture)
     {
         _fixture = fixture;
     }

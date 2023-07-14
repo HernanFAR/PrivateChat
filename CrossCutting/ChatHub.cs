@@ -27,7 +27,7 @@ public class ChatHub : Hub<IChatHub>
         var userManager = httpContext
             .RequestServices.GetRequiredService<UserManager>();
 
-        var userAdded = userManager.RegisterUserWithContext(Context.GetNameIdentifier(), Context);
+        var userAdded = userManager.UpdateConnectionIdOfUser(Context.GetNameIdentifier(), Context);
 
         if (userAdded.IsFailure)
         {
@@ -35,34 +35,5 @@ public class ChatHub : Hub<IChatHub>
         }
 
         return base.OnConnectedAsync();
-    }
-
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        var httpContext = Context.GetHttpContext();
-        ArgumentNullException.ThrowIfNull(httpContext);
-
-        var userManager = httpContext
-            .RequestServices.GetRequiredService<UserManager>();
-
-        var nameIdentifier = Context.GetNameIdentifier();
-        var name = Context.GetName();
-
-        var rooms = userManager.GetRoomsOfUser(nameIdentifier);
-
-        foreach (var roomId in rooms)
-        {
-            await Clients.Group(roomId)
-                .ReceiveMessage(
-                    "System", 
-                    Guid.Empty.ToString().Replace("-", ""), 
-                    roomId, 
-                    $"Se ha desconectado {name}#{nameIdentifier}", 
-                    DateTimeOffset.Now);
-        }
-
-        userManager.RemoveUser(nameIdentifier);
-
-        await base.OnDisconnectedAsync(exception);
     }
 }
