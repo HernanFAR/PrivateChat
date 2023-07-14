@@ -33,11 +33,11 @@ builder.Services.AddSwaggerGen(setup =>
     setup.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "PrivateChatWebApi",
-        Version = "v1.2.2",
-        Description = "Una WebApi open-source para mensajerÌa instant·nea, sin guardado de informaciÛn en servidor",
+        Version = "v1.2.3",
+        Description = "Una WebApi open-source para mensajer√≠a instant√°nea, sin guardado de informaci√≥n en servidor",
         Contact = new OpenApiContact
         {
-            Name = "Hern·n ¡lvarez",
+            Name = "Hern√°n √Ålvarez",
             Email = "h.f.alvarez.rubio@gmail.com",
             Url = new Uri("https://github.com/HernanFAR/PrivateChat")
         },
